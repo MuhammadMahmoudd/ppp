@@ -6,7 +6,7 @@
  * session to be ready, then records. Releasing early cancels gracefully.
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState, Linking, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { AppState, Linking, StyleSheet, View } from 'react-native';
 import { CameraView, useCameraPermissions, useMicrophonePermissions, type CameraMode, type CameraType, type FlashMode, type FocusMode } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -51,7 +51,6 @@ type Props = {
 export function SnapCamera({ active, onCapture, topInset, bottomInset, accessory }: Props) {
   const s = useStrings();
   const reduce = useReducedMotion();
-  const { width, height } = useWindowDimensions();
   const appActive = useAppActive();
   const [camPerm, requestCam] = useCameraPermissions();
   const [micPerm, requestMic] = useMicrophonePermissions();
@@ -310,8 +309,6 @@ export function SnapCamera({ active, onCapture, topInset, bottomInset, accessory
         </View>
         <Txt variant="tiny" muted center>{s.snaps.holdForVideo}</Txt>
       </View>
-      {/* keep layout math stable on tiny screens */}
-      <View style={{ position: 'absolute', width, height }} pointerEvents="none" />
     </View>
   );
 }

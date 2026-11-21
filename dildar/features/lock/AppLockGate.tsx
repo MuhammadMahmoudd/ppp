@@ -18,7 +18,7 @@ import { stopPattern } from '@/lib/haptics';
 
 const AUTO_LOCK_MS = 60_000;
 
-export function AppLockGate({ children, enabled }: { children: React.ReactNode; enabled: boolean }) {
+export function AppLockGate({ children, enabled, skipInitialLock }: { children: React.ReactNode; enabled: boolean; skipInitialLock?: boolean }) {
   const { locked, hidden, cover } = useLock();
   const { faceIdOnOpen, quickHideShake } = useSettings();
   const backgroundAt = useRef<number | null>(null);
@@ -28,6 +28,12 @@ export function AppLockGate({ children, enabled }: { children: React.ReactNode; 
     ScreenCapture.enableAppSwitcherProtectionAsync(0.9).catch(() => undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (enabled && skipInitialLock) lockStore.set((s) => ({ ...s, locked: false }));
+    // only when the gate first becomes active
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled]);
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', (st) => {

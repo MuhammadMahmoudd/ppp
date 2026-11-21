@@ -1,0 +1,31 @@
+# Supabase CLI config (only the parts Dildar relies on).
+# Link your project with: npx supabase link --project-ref <ref>
+project_id = "dildar"
+
+[api]
+schemas = ["public"]
+
+[auth]
+# After you have both created your accounts, turn sign-ups OFF in the
+# dashboard (Auth → Providers → "Allow new users to sign up").
+enable_signup = true
+
+[auth.external.apple]
+enabled = true
+client_id = "com.surchy.dildar"
+
+# Cron-only functions are called by pg_cron with x-cron-secret, not a user JWT.
+[functions.purge_expired]
+verify_jwt = false
+
+[functions.deliver_scheduled]
+verify_jwt = false
+
+[functions.streak_check]
+verify_jwt = false
+
+[functions.send_push]
+verify_jwt = true
+
+[functions.snap_opened]
+verify_jwt = true

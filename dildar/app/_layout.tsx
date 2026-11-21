@@ -1,5 +1,5 @@
 import '@/lib/polyfills';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { Stack, router, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -50,11 +50,17 @@ function StageRouter() {
   return null;
 }
 
+const SETUP_STAGES: Stage[] = ['signedOut', 'needsKeys', 'needsPairing', 'needsProfile'];
+
 function Shell() {
   const { stage } = useSession();
+  // If the user just went through sign-in/setup, don't ask for Face ID again
+  // right away; the lock applies from the next open / 60s in background.
+  const didSetup = useRef(false);
+  if (SETUP_STAGES.includes(stage)) didSetup.current = true;
   if (stage === 'unconfigured') return <NotConfigured />;
   return (
-    <AppLockGate enabled={stage === 'ready'}>
+    <AppLockGate enabled={stage === 'ready'} skipInitialLock={didSetup.current}>
       <StageRouter />
       {stage === 'ready' && <AppServices />}
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg }, animation: 'fade' }}>

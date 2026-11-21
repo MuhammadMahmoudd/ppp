@@ -58,6 +58,8 @@ export function useChat(coupleId: string, me: string, key: Uint8Array | null, ac
   // ── ghosts: confirmed outbox items not yet echoed by realtime ──
   const prevOutbox = useRef<OutgoingMessage[]>([]);
   const [ghosts, setGhosts] = useState<OutgoingMessage[]>([]);
+  const ghostTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  useEffect(() => () => ghostTimers.current.forEach(clearTimeout), []);
   useEffect(() => {
     const ids = new Set(outbox.map((o) => o.id));
     const left = prevOutbox.current.filter((o) => !ids.has(o.id));
@@ -68,8 +70,7 @@ export function useChat(coupleId: string, me: string, key: Uint8Array | null, ac
     supabase.from('messages').select(COLS).in('id', left.map((l) => l.id)).then(({ data }) => {
       if (data) setRows((rs) => (data as ChatRow[]).reduce(upsertRow, rs));
     });
-    const t = setTimeout(() => setGhosts((g) => g.filter((x) => !left.some((l) => l.id === x.id))), 12_000);
-    return () => clearTimeout(t);
+    ghostTimers.current.push(setTimeout(() => setGhosts((g) => g.filter((x) => !left.some((l) => l.id === x.id))), 12_000));
   }, [outbox]);
 
   const loadReactions = useCallback(async (ids: string[]) => {

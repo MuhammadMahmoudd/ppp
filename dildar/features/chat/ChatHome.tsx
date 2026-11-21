@@ -158,7 +158,8 @@ export function ChatHome({ active }: { active: boolean }) {
         keyboardDismissMode="interactive"
         keyboardShouldPersistTaps="handled"
         drawDistance={600}
-        maintainVisibleContentPosition={{ autoscrollToBottomThreshold: 0.2 }}
+        // inverted list: newest sits at offset 0, older pages append at the far end
+        maintainVisibleContentPosition={{ disabled: true }}
         ListHeaderComponent={
           <View style={{ paddingBottom: composerH + space.sm }}>
             <UploadsRow />

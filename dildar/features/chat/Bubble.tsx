@@ -84,7 +84,8 @@ export const Bubble = memo(function Bubble({ item, body, keyBytes, me, reply, on
       });
     const dbl = Gesture.Tap().numberOfTaps(2).maxDuration(250).onEnd(() => runOnJS(onDoubleTap)(item));
     const lp = Gesture.LongPress().minDuration(380).onStart(() => runOnJS(onLongPress)(item));
-    return Gesture.Exclusive(pan, lp, dbl);
+    // Race: whichever recognizes first wins (a still finger must not starve the long-press)
+    return Gesture.Race(pan, lp, dbl);
   }, [pager.gesture, x, armed, onReply, onDoubleTap, onLongPress, item]);
 
   const rowStyle = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));

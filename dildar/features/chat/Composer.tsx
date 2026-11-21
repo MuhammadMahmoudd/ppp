@@ -133,7 +133,8 @@ export function Composer({ ctx, disappearDefault, reply, onCancelReply, proofFor
       })
       .onFinalize((_e, success) => {
         drag.value = withSpring(0, springs.snappy);
-        if (success) runOnJS(stopRec)(cancelArmed.value);
+        // always stop: an interrupted gesture discards the recording
+        runOnJS(stopRec)(!success || cancelArmed.value);
       }),
     Gesture.Tap().onEnd(() => runOnJS(haptic.tap)()),
   );

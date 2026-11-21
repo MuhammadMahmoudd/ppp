@@ -1,0 +1,8 @@
+{
+  "CFBundleDisplayName": "دڵدار",
+  "NSCameraUsageDescription": "دڵدار کامێرا بەکاردەهێنێت بۆ ئەوەی بتوانیت سناپ بۆ خۆشەویستەکەت بنێریت.",
+  "NSMicrophoneUsageDescription": "دڵدار مایکرۆفۆن بەکاردەهێنێت بۆ نامەی دەنگی و ڤیدیۆ.",
+  "NSPhotoLibraryUsageDescription": "دڵدار ڕێگەت پێدەدات وێنە هەڵبژێریت بۆ ناردنی تایبەت.",
+  "NSPhotoLibraryAddUsageDescription": "دڵدار تەنها کاتێک وێنە پاشەکەوت دەکات کە خۆت داوای بکەیت.",
+  "NSFaceIDUsageDescription": "دڵدار Face ID بەکاردەهێنێت بۆ داخستنی شوێنە تایبەتەکەت."
+}

@@ -1,0 +1,8 @@
+{
+  "CFBundleDisplayName": "Dildar",
+  "NSCameraUsageDescription": "Dildar uses the camera so you can send snaps to your partner.",
+  "NSMicrophoneUsageDescription": "Dildar uses the microphone for voice notes and video snaps.",
+  "NSPhotoLibraryUsageDescription": "Dildar lets you pick photos to send privately to your partner.",
+  "NSPhotoLibraryAddUsageDescription": "Dildar saves a photo to your library only when you tap Save.",
+  "NSFaceIDUsageDescription": "Dildar uses Face ID to keep your private space locked."
+}

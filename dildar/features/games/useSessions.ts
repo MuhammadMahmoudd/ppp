@@ -9,6 +9,7 @@ export type SessionLite = Pick<GameSessionRow, 'id' | 'game_type' | 'status' | '
 /** Recent game sessions, kept live. */
 export function useGameSessions() {
   const { couple } = useSession();
+  const coupleId = couple?.id ?? null;
   const [items, setItems] = useState<SessionLite[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -24,8 +25,8 @@ export function useGameSessions() {
   }, []);
   useEffect(() => {
     load();
-    if (!couple) return;
-    return subscribeTable<GameSessionRow>('game_sessions', couple.id, () => load());
-  }, [couple, load]);
+    if (!coupleId) return;
+    return subscribeTable<GameSessionRow>('game_sessions', coupleId, () => load());
+  }, [coupleId, load]);
   return { items, loading, error, reload: load };
 }

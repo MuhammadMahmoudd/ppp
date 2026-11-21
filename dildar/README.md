@@ -45,7 +45,7 @@ dildar/
 ├─ i18n/                     ckb.ts (Sorani, primary) · en.ts · sections/<feature>.ts
 ├─ locales/                  iOS permission strings (ckb + en)
 ├─ supabase/
-│  ├─ migrations/            schema + RLS + functions + storage + realtime + cron
+│  ├─ migrations/            6 files: schema + RLS + functions + storage + realtime + cron
 │  ├─ functions/             snap_opened, send_push, purge_expired, deliver_scheduled, streak_check
 │  └─ tests/                 PGlite (real Postgres in-process) RLS/schema tests
 └─ __tests__/                unit tests (crypto, streak/time zones/DST, match, features)

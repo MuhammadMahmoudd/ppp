@@ -47,6 +47,7 @@ export function TopBar() {
         </Pressy>
         <View style={[styles.side, styles.end]}>
           <StreakBadge onPress={() => router.push('/streak')} />
+          <IconButton name="heart-outline" label={s.nav.closeness} onPress={() => router.push('/closeness' as never)} />
           {spicyActive && <IconButton name="flame" color={colors.coral} label={s.nav.spicy} onPress={() => router.push('/spicy')} />}
           <IconButton name="lock-closed-outline" label={s.nav.vault} onPress={() => router.push('/vault')} />
         </View>

@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useKeepAwake } from 'expo-keep-awake';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Txt } from '@/components/Txt';
@@ -20,6 +21,8 @@ import { msUntilNextBeat } from '@/features/closeness/logic';
 import { BeatingHeart } from '@/features/closeness/ui';
 
 export default function SleepMode() {
+  // keep the screen (and the shared heartbeat haptics) alive while sleeping together
+  useKeepAwake('dildar-sleep');
   const s = useStrings();
   const sl = s.closeness.sleep;
   const settings = useSettings();

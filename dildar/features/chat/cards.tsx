@@ -69,6 +69,7 @@ function DareCard({ item, body, onProofVoice }: CardProps & { body: Extract<Mess
           <Button small variant="glass" title={s.chat.cards.doneButton} onPress={() => completeDare(item.id)} />
         )
       ) : null}
+      <Button small variant="ghost" title={s.chat.cards.allDares} onPress={() => router.push('/games/dares' as never)} />
     </Shell>
   );
 }
@@ -133,15 +134,17 @@ export const SpecialCard = memo(function SpecialCard(p: CardProps) {
   switch (body.t) {
     case 'game_result':
       return (
-        <Shell gradient={['#2A1430', '#14090F']}>
-          <View style={styles.row}>
-            <Txt style={styles.emoji}>{GAME_EMOJI[body.game] ?? '🎮'}</Txt>
-            <View style={styles.flex}>
-              <Txt variant="tiny" muted>{s.chat.cards.gameResult} · {s.chat.cards.gameNames[body.game]}</Txt>
-              <Txt>{body.summary}</Txt>
+        <Pressy disabled={!body.sessionId} onPress={() => body.sessionId && router.push(`/games/${body.sessionId}` as never)} scaleTo={0.97}>
+          <Shell gradient={['#2A1430', '#14090F']}>
+            <View style={styles.row}>
+              <Txt style={styles.emoji}>{GAME_EMOJI[body.game] ?? '🎮'}</Txt>
+              <View style={styles.flex}>
+                <Txt variant="tiny" muted>{s.chat.cards.gameResult} · {s.chat.cards.gameNames[body.game]}</Txt>
+                <Txt>{body.summary}</Txt>
+              </View>
             </View>
-          </View>
-        </Shell>
+          </Shell>
+        </Pressy>
       );
     case 'dare':
       return <DareCard {...p} body={body} />;

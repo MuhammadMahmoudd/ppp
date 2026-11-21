@@ -26,7 +26,7 @@ npx eas-cli@latest login        # create a free Expo account if needed
    npx supabase link --project-ref <your-project-ref>
    npx supabase db push            # runs supabase/migrations/* in order
    ```
-   No CLI? Open **SQL Editor** and run the 5 files in
+   No CLI? Open **SQL Editor** and run the 6 files in
    `supabase/migrations/` one by one, in filename order.
    This creates every table with RLS, the 4 private Storage buckets,
    Realtime settings and the cron jobs.

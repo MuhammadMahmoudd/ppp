@@ -45,6 +45,7 @@ export function sealWire(state: GameState, status: GameStatus, key: Uint8Array) 
 
 export function useGameRoom(id: string): Room {
   const { couple, sharedKey } = useSession();
+  const coupleId = couple?.id ?? null;
   const presence = usePresence();
   const [snap, setSnap] = useState<Snapshot<GameState>>({ version: -1, state: null, status: 'invited' });
   const [row, setRow] = useState<GameSessionRow | null>(null);
@@ -91,8 +92,8 @@ export function useGameRoom(id: string): Room {
       const w = openSealed<Wire>(p, keyRef.current);
       if (w && typeof p.version === 'number') accept({ version: p.version, state: w.state, status: w.status }, 'broadcast');
     });
-    const offDb = couple
-      ? subscribeTable<GameSessionRow>('game_sessions', couple.id, (c) => {
+    const offDb = coupleId
+      ? subscribeTable<GameSessionRow>('game_sessions', coupleId, (c) => {
           if (c.new && (c.new as GameSessionRow).id === id) fromRow(c.new as GameSessionRow);
         })
       : () => undefined;
@@ -111,7 +112,7 @@ export function useGameRoom(id: string): Room {
       offPresence();
       setPresenceScreen('games');
     };
-  }, [id, couple, reload, accept, fromRow]);
+  }, [id, coupleId, reload, accept, fromRow]);
 
   const apply = useCallback(
     async (mutator: (s: GameState) => GameState, opts: { status?: GameStatus } = {}) => {

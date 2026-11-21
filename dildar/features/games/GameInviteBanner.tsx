@@ -26,6 +26,7 @@ export function GameInviteBanner() {
   const s = useStrings();
   const insets = useSafeAreaInsets();
   const { couple, userId, partner } = useSession();
+  const coupleId = couple?.id ?? null;
   const [invite, setInvite] = useState<Invite | null>(null);
   const seen = useRef(new Set<string>());
 
@@ -40,8 +41,8 @@ export function GameInviteBanner() {
       const game = p.game as GameType;
       if (typeof p.id === 'string' && GAME_TYPES.includes(game)) show({ id: p.id, game });
     });
-    const offDb = couple
-      ? subscribeTable<GameSessionRow>('game_sessions', couple.id, (c) => {
+    const offDb = coupleId
+      ? subscribeTable<GameSessionRow>('game_sessions', coupleId, (c) => {
           const r = c.new as GameSessionRow | undefined;
           if (c.eventType === 'INSERT' && r && r.created_by !== userId && r.status === 'invited') show({ id: r.id, game: r.game_type });
         })
@@ -50,7 +51,7 @@ export function GameInviteBanner() {
       off();
       offDb();
     };
-  }, [couple, userId]);
+  }, [coupleId, userId]);
 
   useEffect(() => {
     if (!invite) return;

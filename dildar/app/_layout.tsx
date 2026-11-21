@@ -17,6 +17,9 @@ import { SessionProvider, useSession, type Stage } from '@/lib/session';
 import { AppLockGate } from '@/features/lock/AppLockGate';
 import { AppServices } from '@/features/home/AppServices';
 import { NotConfigured } from '@/features/home/NotConfigured';
+import { TonightGlow } from '@/features/spicy/TonightGlow';
+import { IncomingOverlay } from '@/features/closeness/IncomingOverlay';
+import { GameInviteBanner } from '@/features/games/GameInviteBanner';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
@@ -68,6 +71,14 @@ function Shell() {
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="setup" />
       </Stack>
+      {stage === 'ready' && (
+        <>
+          {/* app-wide incoming moments: touches, miss-you, Tonight?, game invites */}
+          <IncomingOverlay />
+          <TonightGlow />
+          <GameInviteBanner />
+        </>
+      )}
     </AppLockGate>
   );
 }

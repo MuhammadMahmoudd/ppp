@@ -123,8 +123,8 @@ export function VaultItemViewer({ id }: { id: string }) {
 
   const move = () =>
     Alert.alert(s.vault.moveToAlbum, undefined, [
-      { text: s.vault.noAlbum, onPress: () => moveToAlbum(id, null).then(() => haptic.success()) },
-      ...albums.map((a) => ({ text: a.name, onPress: () => moveToAlbum(id, a.id).then(() => haptic.success()) })),
+      { text: s.vault.noAlbum, onPress: () => moveToAlbum(id, null).then(() => { haptic.success(); }) },
+      ...albums.map((a) => ({ text: a.name, onPress: () => moveToAlbum(id, a.id).then(() => { haptic.success(); }) })),
       { text: s.common.cancel, style: 'cancel' as const },
     ]);
 

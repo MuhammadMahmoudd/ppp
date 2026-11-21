@@ -1,13 +1,12 @@
 import React from 'react';
-import { Screen } from '@/components/Screen';
-import { Header } from '@/components/Header';
-import { EmptyState } from '@/components/States';
+import { VaultGate } from '@/features/vault/VaultGate';
+import { VaultHome } from '@/features/vault/VaultHome';
 
-/** Placeholder — implemented in its feature phase. */
-export default function Placeholder() {
+/** Vault: Face ID + optional PIN, then the encrypted grid. */
+export default function VaultRoute() {
   return (
-    <Screen header={<Header title="" />}>
-      <EmptyState />
-    </Screen>
+    <VaultGate>
+      <VaultHome />
+    </VaultGate>
   );
 }

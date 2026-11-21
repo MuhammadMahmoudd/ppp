@@ -142,7 +142,7 @@ export function VaultHome() {
               onOpen={() => router.push({ pathname: '/vault/[id]', params: { id: item.id } })}
             />
           )}
-          ListFooterComponent={visible.length ? <Txt variant="tiny" muted center style={styles.footer}>{s.vault.holdToPeek}</Txt> : null}
+          ListFooterComponent={visible.length ? <Txt variant="tiny" muted center style={styles.footer}>{s.vault.holdToPeek}</Txt> : undefined}
         />
       )}
       <VoiceRecorder

@@ -1,8 +1,10 @@
 /**
- * Background services for the vault feature (offline-queue runners, realtime
- * listeners, push routing). Called once from features/home/AppServices.tsx
- * while the app is in the 'ready' stage.
+ * Vault services: re-lock the vault (and drop decrypted thumbnails from
+ * memory) whenever the app leaves the foreground.
  */
+import { useEffect } from 'react';
+import { installVaultAutoLock } from './vaultSession';
+
 export function useVaultServices(): void {
-  // implemented in the vault phase
+  useEffect(() => installVaultAutoLock(), []);
 }

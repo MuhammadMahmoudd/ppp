@@ -1,5 +1,5 @@
 /** The Camera page (home, center). Camera-first: the app opens here. */
-import React, { useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useChromeInsets } from '@/features/home/chrome';
 import { usePager } from '@/features/home/Pager';
@@ -10,15 +10,20 @@ import { SendingPill } from './SendingPill';
 
 export function CameraScreen({ active }: { active: boolean }) {
   const { top, bottom } = useChromeInsets();
-  const { setSwipeEnabled } = usePager();
-  const onEditingChange = useCallback((editing: boolean) => setSwipeEnabled(!editing), [setSwipeEnabled]);
+  const { setSwipeEnabled, gesture } = usePager();
+  const [editing, setEditing] = useState(false);
+  const [recording, setRecording] = useState(false);
+  // no page swiping while editing a snap or recording a video
+  useEffect(() => setSwipeEnabled(!editing && !recording), [editing, recording, setSwipeEnabled]);
   return (
     <View style={styles.root}>
       <SnapStudio
         active={active}
         topInset={top}
         bottomInset={bottom}
-        onEditingChange={onEditingChange}
+        onEditingChange={setEditing}
+        onRecordingChange={setRecording}
+        blockGesture={gesture}
         accessory={
           <View style={styles.accessory}>
             <SendingPill />

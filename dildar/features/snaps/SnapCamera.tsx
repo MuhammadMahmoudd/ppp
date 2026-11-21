@@ -46,9 +46,12 @@ type Props = {
   bottomInset: number;
   /** extra UI rendered above the shutter (e.g. incoming snaps) */
   accessory?: React.ReactNode;
+  /** an outer gesture (the home pager) the shutter must win against */
+  blockGesture?: ReturnType<typeof Gesture.Pan>;
+  onRecordingChange?: (recording: boolean) => void;
 };
 
-export function SnapCamera({ active, onCapture, topInset, bottomInset, accessory }: Props) {
+export function SnapCamera({ active, onCapture, topInset, bottomInset, accessory, blockGesture, onRecordingChange }: Props) {
   const s = useStrings();
   const reduce = useReducedMotion();
   const appActive = useAppActive();
@@ -77,6 +80,8 @@ export function SnapCamera({ active, onCapture, topInset, bottomInset, accessory
   const zoomSV = useSharedValue(0);
 
   const live = active && appActive && !!camPerm?.granted;
+  const selectHaptic = useCallback(() => haptic.select(), []);
+  useEffect(() => onRecordingChange?.(recording), [recording, onRecordingChange]);
 
   // reset when leaving the page
   useEffect(() => {
@@ -170,7 +175,7 @@ export function SnapCamera({ active, onCapture, topInset, bottomInset, accessory
       focusS.value = withSpring(1, { damping: 12, stiffness: 200 });
       focusO.value = withSequence(withTiming(1, { duration: 500 }), withTiming(0, { duration: 300 }));
       runOnJS(refocus)();
-      runOnJS(haptic.select)();
+      runOnJS(selectHaptic)();
     });
   const doubleTap = Gesture.Tap().numberOfTaps(2).onEnd((_e, ok) => {
     if (ok) runOnJS(flip)();
@@ -187,8 +192,7 @@ export function SnapCamera({ active, onCapture, topInset, bottomInset, accessory
   const previewGesture = Gesture.Simultaneous(pinch, Gesture.Exclusive(doubleTap, tap));
 
   // shutter: tap = photo, long press = video
-  const shutter = Gesture.Exclusive(
-    Gesture.LongPress()
+  const longPress = Gesture.LongPress()
       .minDuration(280)
       .maxDistance(400)
       .onStart(() => {
@@ -198,13 +202,17 @@ export function SnapCamera({ active, onCapture, topInset, bottomInset, accessory
       .onFinalize(() => {
         shutterScale.value = withSpring(1);
         runOnJS(stopVideo)();
-      }),
-    Gesture.Tap().onEnd((_e, ok) => {
-      if (!ok) return;
-      shutterScale.value = withSequence(withTiming(0.86, { duration: 70 }), withSpring(1));
-      runOnJS(takePhoto)();
-    }),
-  );
+      });
+  const shutterTap = Gesture.Tap().onEnd((_e, ok) => {
+    if (!ok) return;
+    shutterScale.value = withSequence(withTiming(0.86, { duration: 70 }), withSpring(1));
+    runOnJS(takePhoto)();
+  });
+  if (blockGesture) {
+    longPress.blocksExternalGesture(blockGesture);
+    shutterTap.blocksExternalGesture(blockGesture);
+  }
+  const shutter = Gesture.Exclusive(longPress, shutterTap);
 
   const focusStyle = useAnimatedStyle(() => ({
     opacity: focusO.value,

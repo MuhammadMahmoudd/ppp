@@ -54,7 +54,7 @@ export function FlipCard({ faceKey, title, body, heat = 1, footer, emoji = '♥'
 
 const styles = StyleSheet.create({
   wrap: { width: '100%', aspectRatio: 0.78, maxHeight: 360, alignSelf: 'center' },
-  card: { ...StyleSheet.absoluteFillObject, borderRadius: radius.xl, overflow: 'hidden', backfaceVisibility: 'hidden' },
+  card: { position: 'absolute', top: 0, bottom: 0, start: 0, end: 0, borderRadius: radius.xl, overflow: 'hidden', backfaceVisibility: 'hidden' },
   face: { backgroundColor: colors.bgElevated, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border, padding: space.lg, gap: space.sm },
   stripe: { position: 'absolute', top: 0, start: 0, end: 0, height: 6 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },

@@ -3,6 +3,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@/components/Button';
+import { Screen } from '@/components/Screen';
+import { Header } from '@/components/Header';
 import { Txt } from '@/components/Txt';
 import { colors, space } from '@/lib/theme';
 import { fmt, useStrings } from '@/lib/i18n';
@@ -58,18 +60,20 @@ export function VaultGate({ children }: { children: React.ReactNode }) {
 
   if (unlocked) return <>{children}</>;
   return (
-    <View style={styles.root}>
-      {step === 'pin' ? (
-        <PinPad title={s.vault.pin.enter} error={error} onSubmit={checkPin} disabled={busy} />
-      ) : (
-        <View style={styles.center}>
-          <Ionicons name="lock-closed" size={56} color={colors.rose} />
-          <Txt variant="title" center>{s.vault.locked}</Txt>
-          <Txt muted center>{s.vault.subtitle}</Txt>
-          <Button title={s.vault.unlock} onPress={start} icon={<Ionicons name="scan-outline" size={20} color={colors.text} />} />
-        </View>
-      )}
-    </View>
+    <Screen header={<Header title={s.vault.title} />}>
+      <View style={styles.root}>
+        {step === 'pin' ? (
+          <PinPad title={s.vault.pin.enter} error={error} onSubmit={checkPin} disabled={busy} />
+        ) : (
+          <View style={styles.center}>
+            <Ionicons name="lock-closed" size={56} color={colors.rose} />
+            <Txt variant="title" center>{s.vault.locked}</Txt>
+            <Txt muted center>{s.vault.subtitle}</Txt>
+            <Button title={s.vault.unlock} onPress={start} icon={<Ionicons name="scan-outline" size={20} color={colors.text} />} />
+          </View>
+        )}
+      </View>
+    </Screen>
   );
 }
 

@@ -1,6 +1,8 @@
 /** Camera → editor → send. Used by the Camera page and the compose modal. */
 import React, { useCallback, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Modal, StyleSheet, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useSession } from '@/lib/session';
 import { useStrings } from '@/lib/i18n';
 import { Txt } from '@/components/Txt';
@@ -9,6 +11,7 @@ import { SnapCamera } from './SnapCamera';
 import { SnapEditor } from './SnapEditor';
 import { sendSnap, uploadSnap, type Capture, type SnapOptions } from './sendSnap';
 import { uuid } from '@/lib/ids';
+import { useLock } from '@/features/lock/lockStore';
 
 type Props = {
   active: boolean;
@@ -20,13 +23,17 @@ type Props = {
   proofFor?: string | null;
   editorTitle?: string;
   onSent?: (messageId: string | null) => void;
+  blockGesture?: React.ComponentProps<typeof SnapCamera>['blockGesture'];
+  onRecordingChange?: (recording: boolean) => void;
 };
 
-export function SnapStudio({ active, topInset, bottomInset, accessory, onEditingChange, proofFor, editorTitle, onSent }: Props) {
+export function SnapStudio({ active, topInset, bottomInset, accessory, onEditingChange, proofFor, editorTitle, onSent, blockGesture, onRecordingChange }: Props) {
   const s = useStrings();
   const { couple, userId, sharedKey, partner } = useSession();
   const [capture, setCapture] = useState<Capture | null>(null);
   const [noKey, setNoKey] = useState(false);
+  const lock = useLock();
+  const privacy = lock.locked || lock.hidden || lock.cover;
 
   const open = useCallback((c: Capture) => {
     setCapture(c);
@@ -62,10 +69,17 @@ export function SnapStudio({ active, topInset, bottomInset, accessory, onEditing
 
   return (
     <View style={styles.root}>
-      <SnapCamera active={active && !capture} onCapture={open} topInset={topInset} bottomInset={bottomInset} accessory={accessory} />
-      {capture && (
-        <SnapEditor capture={capture} partnerName={partner?.display_name || s.common.partner} onDiscard={close} onSend={send} title={editorTitle} />
-      )}
+      <SnapCamera active={active && !capture} onCapture={open} topInset={topInset} bottomInset={bottomInset} accessory={accessory} blockGesture={blockGesture} onRecordingChange={onRecordingChange} />
+      {/* Modal: the editor must sit above the home top bar / bottom nav */}
+      <Modal visible={!!capture && !privacy} animationType="fade" presentationStyle="overFullScreen" transparent statusBarTranslucent onRequestClose={close}>
+        <GestureHandlerRootView style={styles.modal}>
+          <SafeAreaProvider>
+            {capture && (
+              <SnapEditor capture={capture} partnerName={partner?.display_name || s.common.partner} onDiscard={close} onSend={send} title={editorTitle} />
+            )}
+          </SafeAreaProvider>
+        </GestureHandlerRootView>
+      </Modal>
       {noKey && (
         <View style={styles.noKey}>
           <Txt center color={colors.warning}>{s.states.noPartnerKey}</Txt>
@@ -77,5 +91,6 @@ export function SnapStudio({ active, topInset, bottomInset, accessory, onEditing
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#000' },
+  modal: { flex: 1, backgroundColor: '#000' },
   noKey: { position: 'absolute', top: '45%', start: 24, end: 24, backgroundColor: 'rgba(0,0,0,0.7)', padding: 16, borderRadius: 16 },
 });

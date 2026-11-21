@@ -112,7 +112,7 @@ export function IncomingOverlay() {
 
 const styles = StyleSheet.create({
   root: { zIndex: 900 },
-  ltrLayer: { ...StyleSheet.absoluteFillObject, direction: 'ltr' },
+  ltrLayer: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, direction: 'ltr' },
   toastWrap: { position: 'absolute', top: 64, start: space.xl, end: space.xl },
   toast: { paddingVertical: space.md },
 });

@@ -43,7 +43,16 @@ export function useAsync<T>(fn: () => Promise<T>, deps: unknown[]): AsyncState<T
   }, []);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { setLoading(true); reload(); }, deps);
-  useFocusEffect(useCallback(() => { reload(); }, [reload]));
+  const firstFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (firstFocus.current) {
+        firstFocus.current = false; // the effect above already loaded
+        return;
+      }
+      reload();
+    }, [reload]),
+  );
   return { data, loading, error, reload };
 }
 

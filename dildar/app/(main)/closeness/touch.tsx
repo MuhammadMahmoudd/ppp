@@ -88,9 +88,9 @@ const styles = StyleSheet.create({
   chipsWrap: { flexGrow: 0 },
   chips: { gap: space.sm },
   canvas: { flex: 1, borderRadius: radius.xl, overflow: 'hidden', borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border },
-  hint: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', gap: space.sm, opacity: 0.6 },
+  hint: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, alignItems: 'center', justifyContent: 'center', gap: space.sm, opacity: 0.6 },
   hand: { fontSize: 56, lineHeight: 72 },
   note: { minHeight: 20 },
   // physical coordinates: keep absolute `left` un-mirrored in RTL
-  ltrLayer: { ...StyleSheet.absoluteFillObject, direction: 'ltr' },
+  ltrLayer: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, direction: 'ltr' },
 });

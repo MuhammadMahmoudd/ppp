@@ -14,7 +14,7 @@ import { createStore, useStore } from './store';
 import { enqueue, registerRunner } from './offlineQueue';
 import { sealJSON, tryOpenJSON } from './crypto';
 import { uuid } from './ids';
-import { supabase } from './supabase';
+import { api } from './api';
 import { notifyPartner, type PushKind } from './push';
 import type { DisappearMode, GameType, Heat, MessageRow, MessageType } from './database.types';
 import type { TouchPattern } from './haptics';
@@ -76,7 +76,7 @@ const PUSH_FOR: Partial<Record<MessageType, PushKind>> = {
 
 registerRunner('message.insert', async (p) => {
   const m = p as unknown as OutgoingMessage;
-  const { error } = await supabase.from('messages').upsert(
+  const { error } = await api.from('messages').upsert(
     {
       id: m.id, couple_id: m.couple_id, sender_id: m.sender_id, type: m.type,
       ciphertext: m.ciphertext, nonce: m.nonce, media_path: m.media_path, media_nonce: m.media_nonce,

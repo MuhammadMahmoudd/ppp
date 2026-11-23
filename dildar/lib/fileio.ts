@@ -1,7 +1,7 @@
 /** Native (iOS) file I/O used by lib/media.ts. Web version: fileio.web.ts. */
 import { Directory, File, Paths } from 'expo-file-system';
 import { uuid } from './ids';
-import { supabase, type Bucket } from './supabase';
+import { api, type Bucket } from './api';
 
 const tmpDir = () => new Directory(Paths.cache, 'dildar-tmp');
 
@@ -11,7 +11,7 @@ export async function readFileBytes(uri: string): Promise<Uint8Array> {
 
 /** Downloads the ciphertext via a short-lived signed URL; the cipher file is deleted right after reading. */
 export async function downloadCipher(bucket: Bucket, path: string): Promise<Uint8Array> {
-  const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, 60);
+  const { data, error } = await api.storage.from(bucket).createSignedUrl(path, 60);
   if (error || !data) throw error ?? new Error('no_url');
   const dir = tmpDir();
   if (!dir.exists) dir.create({ intermediates: true, idempotent: true });

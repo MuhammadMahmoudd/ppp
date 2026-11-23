@@ -15,7 +15,7 @@ import { ErrorState, Skeleton } from '@/components/States';
 import { colors, radius, space } from '@/lib/theme';
 import { fmt, num, relativeTime, useStrings } from '@/lib/i18n';
 import { useSession } from '@/lib/session';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { bytesToDataUri, deleteTempFile, downloadAndDecrypt, writeTempFile } from '@/lib/media';
 import { haptic } from '@/lib/haptics';
 import { useScreenGuard } from '@/features/security/useScreenGuard';

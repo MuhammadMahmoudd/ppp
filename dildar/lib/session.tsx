@@ -4,7 +4,7 @@
  */
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { supabase, supabaseConfigured } from './supabase';
+import { api, apiConfigured } from './api';
 import type { CoupleRow, MemberRow, ProfileRow } from './database.types';
 import { deriveSharedKey, type KeyPairB64 } from './crypto';
 import { loadLocalKeyPair, publishPublicKey } from './keys';
@@ -45,15 +45,15 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const loadSeq = useRef(0);
 
   useEffect(() => {
-    if (!supabaseConfigured) {
+    if (!apiConfigured) {
       setAuthReady(true);
       return;
     }
-    supabase.auth.getSession().then(({ data }) => {
+    api.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setAuthReady(true);
     });
-    const { data } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
+    const { data } = api.auth.onAuthStateChange((_e, s) => setSession(s));
     return () => data.subscription.unsubscribe();
   }, []);
 
@@ -62,8 +62,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     const seq = ++loadSeq.current;
     const [kp, profiles, mem] = await Promise.all([
       loadLocalKeyPair(userId),
-      supabase.from('profiles').select('*'),
-      supabase.from('couple_members').select('*'),
+      api.from('profiles').select('*'),
+      api.from('couple_members').select('*'),
     ]);
     if (seq !== loadSeq.current) return;
     const myProfile = profiles.data?.find((p) => p.user_id === userId) ?? null;
@@ -71,7 +71,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     const myMember = memberRows.find((m) => m.user_id === userId);
     let cpl: CoupleRow | null = null;
     if (myMember) {
-      const { data } = await supabase.from('couples').select('*').eq('id', myMember.couple_id).maybeSingle();
+      const { data } = await api.from('couples').select('*').eq('id', myMember.couple_id).maybeSingle();
       cpl = data ?? null;
     }
     if (seq !== loadSeq.current) return;
@@ -134,7 +134,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const paired = members.length === 2;
 
   let stage: Stage;
-  if (!supabaseConfigured) stage = 'unconfigured';
+  if (!apiConfigured) stage = 'unconfigured';
   else if (!authReady) stage = 'loading';
   else if (!session) stage = 'signedOut';
   else if (!loaded) stage = 'loading';
@@ -161,7 +161,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     setKeyPair: (kp) => setKeyPair(kp),
     signOut: async () => {
       disconnectCoupleChannel();
-      await supabase.auth.signOut();
+      await api.auth.signOut();
     },
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

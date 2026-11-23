@@ -16,7 +16,7 @@ import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { colors, gradients, radius, space, springs } from '@/lib/theme';
 import { fmt, useStrings } from '@/lib/i18n';
 import { useSession } from '@/lib/session';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { tryOpenString } from '@/lib/crypto';
 import { haptic } from '@/lib/haptics';
 import { useReducedMotion } from '@/lib/settings';
@@ -42,10 +42,10 @@ export default function EnvelopeScreen() {
 
   const load = useCallback(async () => {
     setError(false);
-    const { data, error: err } = await supabase.from('envelopes').select('*').eq('id', id).maybeSingle();
+    const { data, error: err } = await api.from('envelopes').select('*').eq('id', id).maybeSingle();
     if (err) return setError(true);
     if (!data) return setState('missing');
-    const c = await supabase.from('envelope_contents').select('*').eq('envelope_id', id).maybeSingle();
+    const c = await api.from('envelope_contents').select('*').eq('envelope_id', id).maybeSingle();
     setState({
       env: data,
       title: tryOpenString(data.title_ciphertext, data.title_nonce, sharedKey),
@@ -82,7 +82,7 @@ export default function EnvelopeScreen() {
 
   const open = async () => {
     setBusy(true);
-    const { error: err } = await supabase.rpc('open_envelope', { p_id: id });
+    const { error: err } = await api.rpc('open_envelope', { p_id: id });
     setBusy(false);
     if (err) {
       haptic.error();

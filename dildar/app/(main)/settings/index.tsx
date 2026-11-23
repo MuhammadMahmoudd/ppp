@@ -12,7 +12,7 @@ import { colors, space } from '@/lib/theme';
 import { fmt, setLocale, useStrings } from '@/lib/i18n';
 import { updateSettings, useSettings } from '@/lib/settings';
 import { useSession } from '@/lib/session';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { coupleLevel } from '@/lib/streak';
 import { haptic } from '@/lib/haptics';
 import { authenticate } from '@/features/lock/lockStore';
@@ -27,7 +27,7 @@ export default function Settings() {
 
   const toggleSpicy = async (v: boolean) => {
     if (v && !(await authenticate())) return;
-    const { error } = await supabase.rpc('set_spicy', { enabled: v });
+    const { error } = await api.rpc('set_spicy', { enabled: v });
     if (!error) haptic.success();
   };
 

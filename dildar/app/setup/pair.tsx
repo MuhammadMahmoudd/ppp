@@ -16,7 +16,7 @@ import { Pressy } from '@/components/Pressy';
 import { colors, radius, space } from '@/lib/theme';
 import { fmt, num, useStrings } from '@/lib/i18n';
 import { useSession } from '@/lib/session';
-import { supabase, errorCode } from '@/lib/supabase';
+import { api, errorCode } from '@/lib/api';
 import { haptic } from '@/lib/haptics';
 import { splitDuration } from '@/lib/time';
 
@@ -39,9 +39,9 @@ export default function Pair() {
     setBusy(true);
     setError(null);
     try {
-      const c = await supabase.rpc('create_couple', { adult_confirmed: true });
+      const c = await api.rpc('create_couple', { adult_confirmed: true });
       if (c.error) throw c.error;
-      const inv = await supabase.rpc('create_invite');
+      const inv = await api.rpc('create_invite');
       if (inv.error) throw inv.error;
       setCode(inv.data?.[0] ?? null);
       haptic.success();
@@ -58,7 +58,7 @@ export default function Pair() {
     setBusy(true);
     setError(null);
     try {
-      const r = await supabase.rpc('redeem_invite', { invite_code: entered, adult_confirmed: true });
+      const r = await api.rpc('redeem_invite', { invite_code: entered, adult_confirmed: true });
       if (r.error) throw r.error;
       if (!r.data) throw new Error('invalid_code');
       haptic.success();

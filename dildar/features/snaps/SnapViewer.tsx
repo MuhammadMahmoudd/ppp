@@ -25,7 +25,7 @@ import { Txt } from '@/components/Txt';
 import { colors, radius, space } from '@/lib/theme';
 import { fmt, relativeTime, useStrings } from '@/lib/i18n';
 import { useSession } from '@/lib/session';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { tryOpenJSON } from '@/lib/crypto';
 import { bytesToDataUri, deleteTempFile, downloadAndDecrypt, encryptAndUpload, writeTempFile } from '@/lib/media';
 import { sealJSON } from '@/lib/crypto';
@@ -85,7 +85,7 @@ export function SnapViewer({ id }: { id: string }) {
     let alive = true;
     (async () => {
       if (!userId || !sharedKey) return;
-      const { data, error } = await supabase.from('snaps').select('*').eq('id', id).maybeSingle();
+      const { data, error } = await api.from('snaps').select('*').eq('id', id).maybeSingle();
       if (!alive) return;
       if (error) return setPhase('error');
       if (!data) return setPhase('notFound');
@@ -132,7 +132,7 @@ export function SnapViewer({ id }: { id: string }) {
     if (!revealed || reported.current || !row) return;
     reported.current = true;
     haptic.soft();
-    supabase.functions.invoke('snap_opened', { body: { snap_id: row.id } }).catch(() => undefined);
+    api.functions.invoke('snap_opened', { body: { snap_id: row.id } }).catch(() => undefined);
   }, [revealed, row]);
 
   const close = useCallback(async (goNext: boolean) => {
@@ -189,7 +189,7 @@ export function SnapViewer({ id }: { id: string }) {
     try {
       const up = await encryptAndUpload('vault', couple.id, bytes.current, sharedKey);
       const m = sealJSON({ mime: meta?.mime ?? 'image/jpeg', ext: meta?.ext ?? 'jpg', from: 'snap' }, sharedKey);
-      const { error } = await supabase.from('vault_items').insert({
+      const { error } = await api.from('vault_items').insert({
         couple_id: couple.id,
         kind: row.media_kind,
         storage_path: up.path,

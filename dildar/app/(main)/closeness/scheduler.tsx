@@ -16,7 +16,7 @@ import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { colors, space } from '@/lib/theme';
 import { fmt, useStrings } from '@/lib/i18n';
 import { useSession } from '@/lib/session';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { sealJSON, tryOpenJSON } from '@/lib/crypto';
 import { dayKey, formatClock } from '@/lib/time';
 import { haptic } from '@/lib/haptics';
@@ -44,7 +44,7 @@ export default function Scheduler() {
   const slotLabel = { tonight: t.quickTonight, morning: t.quickMorning, tomorrowNight: t.quickTomorrowNight };
 
   const list = useAsync(async () => {
-    const { data, error } = await supabase.from('scheduled_items').select('*').is('delivered_at', null).order('deliver_at');
+    const { data, error } = await api.from('scheduled_items').select('*').is('delivered_at', null).order('deliver_at');
     if (error) throw error;
     return data ?? [];
   }, []);
@@ -57,7 +57,7 @@ export default function Scheduler() {
     setErr(null);
     const body: MessageBody = { t: 'text', text: text.trim() };
     const sealed = sealJSON(body, sharedKey);
-    const { error } = await supabase.from('scheduled_items').insert({
+    const { error } = await api.from('scheduled_items').insert({
       couple_id: couple.id, kind: 'message', message_type: 'text',
       payload_ciphertext: sealed.c, nonce: sealed.n, deliver_at: at.toISOString(),
     });
@@ -75,7 +75,7 @@ export default function Scheduler() {
 
   const cancel = async (id: string) => {
     haptic.warning();
-    await supabase.from('scheduled_items').delete().eq('id', id);
+    await api.from('scheduled_items').delete().eq('id', id);
     list.reload();
   };
 

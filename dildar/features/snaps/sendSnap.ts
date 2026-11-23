@@ -6,7 +6,7 @@
 import { encryptAndUpload } from '@/lib/media';
 import { sealJSON } from '@/lib/crypto';
 import { uuid } from '@/lib/ids';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { postMessage } from '@/lib/messages';
 import { createStore, useStore } from '@/lib/store';
 import { haptic } from '@/lib/haptics';
@@ -39,7 +39,7 @@ export async function uploadSnap(ctx: SendCtx, cap: Capture, opts: SnapOptions, 
   const up = await encryptAndUpload('snaps', ctx.coupleId, cap.uri, ctx.key);
   const meta: SnapMeta = { v: 1, mime, ext, w: cap.width, h: cap.height, overlay: encodeOverlay(opts.overlay) };
   const sealedMeta = sealJSON(meta, ctx.key);
-  const { error } = await supabase.from('snaps').upsert(
+  const { error } = await api.from('snaps').upsert(
     {
       id: snapId,
       couple_id: ctx.coupleId,
@@ -58,7 +58,7 @@ export async function uploadSnap(ctx: SendCtx, cap: Capture, opts: SnapOptions, 
     { onConflict: 'id', ignoreDuplicates: true },
   );
   if (error) {
-    supabase.storage.from('snaps').remove([up.path]).catch(() => undefined);
+    api.storage.from('snaps').remove([up.path]).catch(() => undefined);
     throw error;
   }
   const msgId = await postMessage({
@@ -70,7 +70,7 @@ export async function uploadSnap(ctx: SendCtx, cap: Capture, opts: SnapOptions, 
     meta: { snap_id: snapId },
   });
   if (opts.proofFor) {
-    await supabase.rpc('complete_dare', { message_id: opts.proofFor, proof_message_id: msgId });
+    await api.rpc('complete_dare', { message_id: opts.proofFor, proof_message_id: msgId });
   }
   return msgId;
 }

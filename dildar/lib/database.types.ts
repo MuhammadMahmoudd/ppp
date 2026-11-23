@@ -1,7 +1,7 @@
 /**
  * Hand-written types matching supabase/migrations. Once your project exists
  * you can regenerate with:
- *   npx supabase gen types typescript --project-id <ref> > lib/database.types.ts
+ *   npx api gen types typescript --project-id <ref> > lib/database.types.ts
  * (keep the Row aliases at the bottom).
  */
 type Table<R, Req extends keyof R = never> = {

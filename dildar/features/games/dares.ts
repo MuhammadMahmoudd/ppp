@@ -1,6 +1,6 @@
 /** Async dares: posted into the chat with a deadline; proof by snap or voice. */
 import { postMessage, decodeBody, type MessageBody } from '@/lib/messages';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import type { Heat, MessageRow } from '@/lib/database.types';
 
 export type DareProof = 'snap' | 'voice' | null;
@@ -36,7 +36,7 @@ export async function sendDare(o: {
 }
 
 export async function fetchDares(key: Uint8Array, me: string): Promise<DareView[]> {
-  const { data, error } = await supabase
+  const { data, error } = await api
     .from('messages')
     .select('*')
     .eq('type', 'dare')
@@ -68,6 +68,6 @@ export function isOpen(d: DareView, now = Date.now()): boolean {
 }
 
 export async function completeDare(messageId: string, proofMessageId?: string): Promise<void> {
-  const { error } = await supabase.rpc('complete_dare', proofMessageId ? { message_id: messageId, proof_message_id: proofMessageId } : { message_id: messageId });
+  const { error } = await api.rpc('complete_dare', proofMessageId ? { message_id: messageId, proof_message_id: proofMessageId } : { message_id: messageId });
   if (error) throw error;
 }

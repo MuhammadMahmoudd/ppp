@@ -8,7 +8,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
-import { supabase, errorCode } from '@/lib/supabase';
+import { api, errorCode } from '@/lib/api';
 import { sealJSON, tryOpenJSON } from '@/lib/crypto';
 import { broadcastSealed, onBroadcast, openSealed, presenceStore, setPresenceScreen, subscribeTable, usePresence } from '@/lib/realtime';
 import { useSession } from '@/lib/session';
@@ -74,7 +74,7 @@ export function useGameRoom(id: string): Room {
   );
 
   const reload = useCallback(async () => {
-    const { data, error: e } = await supabase.from('game_sessions').select('*').eq('id', id).maybeSingle();
+    const { data, error: e } = await api.from('game_sessions').select('*').eq('id', id).maybeSingle();
     if (e) setError(errorCode(e));
     else if (!data) setError('not_found');
     else {
@@ -132,7 +132,7 @@ export function useGameRoom(id: string): Room {
           accept(optimistic, 'local');
           broadcastSealed('game:state', { state: next, status } satisfies Wire, key, { id, version: optimistic.version });
           const sealed = sealWire(next, status, key);
-          const { data, error: e } = await supabase.rpc('game_apply', {
+          const { data, error: e } = await api.rpc('game_apply', {
             p_id: id,
             p_expected_version: cur.version,
             p_state_ciphertext: sealed.c,

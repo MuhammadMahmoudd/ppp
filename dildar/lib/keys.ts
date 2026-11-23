@@ -4,7 +4,7 @@
  */
 import { createKeyBackup, generateKeyPair, publicKeyFromSecret, restoreKeyBackup, type KeyPairB64 } from './crypto';
 import { secret } from './secureStorage';
-import { supabase } from './supabase';
+import { api } from './api';
 
 const skName = (userId: string) => `dildar.sk.${userId}`;
 
@@ -19,7 +19,7 @@ async function saveLocal(userId: string, kp: KeyPairB64): Promise<void> {
 }
 
 export async function publishPublicKey(userId: string, publicKey: string): Promise<void> {
-  const { error } = await supabase.from('profiles').update({ public_key: publicKey }).eq('user_id', userId);
+  const { error } = await api.from('profiles').update({ public_key: publicKey }).eq('user_id', userId);
   if (error) throw error;
 }
 
@@ -31,7 +31,7 @@ export async function createAndPublishKeyPair(userId: string): Promise<KeyPairB6
 }
 
 export async function hasRemoteBackup(userId: string): Promise<boolean> {
-  const { data } = await supabase.from('key_backups').select('user_id').eq('user_id', userId).maybeSingle();
+  const { data } = await api.from('key_backups').select('user_id').eq('user_id', userId).maybeSingle();
   return !!data;
 }
 
@@ -39,7 +39,7 @@ export async function uploadBackup(userId: string, kp: KeyPairB64, passphrase: s
   // PBKDF2 is CPU-heavy: yield a frame so the "working…" UI can render first.
   await new Promise((r) => setTimeout(r, 50));
   const b = createKeyBackup(kp.secretKey, passphrase);
-  const { error } = await supabase.from('key_backups').upsert({
+  const { error } = await api.from('key_backups').upsert({
     user_id: userId,
     public_key: b.publicKey,
     salt: b.salt,
@@ -51,7 +51,7 @@ export async function uploadBackup(userId: string, kp: KeyPairB64, passphrase: s
 }
 
 export async function restoreFromBackup(userId: string, passphrase: string): Promise<KeyPairB64> {
-  const { data, error } = await supabase.from('key_backups').select('*').eq('user_id', userId).single();
+  const { data, error } = await api.from('key_backups').select('*').eq('user_id', userId).single();
   if (error || !data) throw error ?? new Error('no_backup');
   await new Promise((r) => setTimeout(r, 50));
   const kp = restoreKeyBackup(data, passphrase); // throws CryptoError('wrong_passphrase')

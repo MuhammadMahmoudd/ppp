@@ -6,7 +6,7 @@ import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
-import { supabase } from './supabase';
+import { api } from './api';
 
 export type PushKind =
   | 'message' | 'snap' | 'game_invite' | 'touch' | 'miss_you' | 'tonight'
@@ -34,17 +34,17 @@ export async function registerForPush(userId: string): Promise<string | null> {
   const projectId = (Constants.expoConfig?.extra as { eas?: { projectId?: string } } | undefined)?.eas?.projectId;
   if (!projectId) return null;
   const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
-  await supabase.from('devices').upsert({ user_id: userId, push_token: token });
+  await api.from('devices').upsert({ user_id: userId, push_token: token });
   return token;
 }
 
 export async function setPushPreviews(userId: string, on: boolean): Promise<void> {
-  await supabase.from('devices').upsert({ user_id: userId, push_previews: on });
+  await api.from('devices').upsert({ user_id: userId, push_previews: on });
 }
 
 /** Fire-and-forget: tells the partner's phone something happened. */
 export function notifyPartner(kind: PushKind, data: Record<string, string> = {}): void {
-  supabase.functions.invoke('send_push', { body: { kind, data } }).catch(() => undefined);
+  api.functions.invoke('send_push', { body: { kind, data } }).catch(() => undefined);
 }
 
 export function addPushResponseListener(cb: (data: Record<string, unknown>) => void): () => void {

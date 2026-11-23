@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { subscribeTable } from '@/lib/realtime';
 import { tryOpenJSON, tryOpenString } from '@/lib/crypto';
 import type { VaultAlbumRow, VaultDeleteRequestRow, VaultItemRow } from '@/lib/database.types';
@@ -18,9 +18,9 @@ export function useVault(coupleId: string | null, key: Uint8Array | null) {
     if (!coupleId) return;
     setError(false);
     const [it, al, rq] = await Promise.all([
-      supabase.from('vault_items').select('*').eq('couple_id', coupleId).order('created_at', { ascending: false }).limit(500),
-      supabase.from('vault_albums').select('*').eq('couple_id', coupleId).order('created_at'),
-      supabase.from('vault_delete_requests').select('*').eq('couple_id', coupleId),
+      api.from('vault_items').select('*').eq('couple_id', coupleId).order('created_at', { ascending: false }).limit(500),
+      api.from('vault_albums').select('*').eq('couple_id', coupleId).order('created_at'),
+      api.from('vault_delete_requests').select('*').eq('couple_id', coupleId),
     ]);
     if (it.error) {
       setError(true);
@@ -42,7 +42,7 @@ export function useVault(coupleId: string | null, key: Uint8Array | null) {
 }
 
 export async function fetchVaultItem(id: string, key: Uint8Array | null): Promise<VaultItem | null> {
-  const { data } = await supabase.from('vault_items').select('*').eq('id', id).maybeSingle();
+  const { data } = await api.from('vault_items').select('*').eq('id', id).maybeSingle();
   if (!data) return null;
   return { ...data, meta: tryOpenJSON<VaultMeta>(data.meta_ciphertext, data.meta_nonce, key) ?? {} };
 }

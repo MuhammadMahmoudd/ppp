@@ -13,7 +13,7 @@ import { EmptyState, ErrorState, SkeletonList } from '@/components/States';
 import { colors, radius, space } from '@/lib/theme';
 import { fmt, relativeTime, useStrings } from '@/lib/i18n';
 import { useSession } from '@/lib/session';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { tryOpenString } from '@/lib/crypto';
 import { useAsync, useNow } from '@/features/closeness/hooks';
 
@@ -23,7 +23,7 @@ export default function Envelopes() {
   const { sharedKey, userId, partner } = useSession();
   const now = useNow(30_000);
   const q = useAsync(async () => {
-    const { data, error } = await supabase.from('envelopes').select('*').order('created_at', { ascending: false });
+    const { data, error } = await api.from('envelopes').select('*').order('created_at', { ascending: false });
     if (error) throw error;
     return data ?? [];
   }, []);

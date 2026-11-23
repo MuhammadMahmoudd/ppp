@@ -12,7 +12,7 @@ import { Input } from '@/components/Input';
 import { Txt } from '@/components/Txt';
 import { colors, gradients, space } from '@/lib/theme';
 import { useStrings } from '@/lib/i18n';
-import { supabase, errorCode } from '@/lib/supabase';
+import { api, errorCode } from '@/lib/api';
 import { haptic } from '@/lib/haptics';
 import { toHex, randomBytes } from '@/lib/crypto';
 
@@ -32,10 +32,10 @@ export default function Welcome() {
     setBusy(true);
     try {
       if (mode === 'signIn') {
-        const { error: e } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+        const { error: e } = await api.auth.signInWithPassword({ email: email.trim(), password });
         if (e) throw e;
       } else {
-        const { data, error: e } = await supabase.auth.signUp({ email: email.trim(), password });
+        const { data, error: e } = await api.auth.signUp({ email: email.trim(), password });
         if (e) throw e;
         if (!data.session) setInfo(s.auth.checkEmail);
       }
@@ -57,7 +57,7 @@ export default function Welcome() {
         nonce: hashed,
       });
       if (!cred.identityToken) throw new Error('no_token');
-      const { error: e } = await supabase.auth.signInWithIdToken({ provider: 'apple', token: cred.identityToken, nonce: raw });
+      const { error: e } = await api.auth.signInWithIdToken({ provider: 'apple', token: cred.identityToken, nonce: raw });
       if (e) throw e;
       haptic.success();
     } catch (e) {

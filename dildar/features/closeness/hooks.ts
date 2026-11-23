@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { createStore, useStore } from '@/lib/store';
 import { broadcast, subscribeTable } from '@/lib/realtime';
 import { notifyPartner } from '@/lib/push';
@@ -61,7 +61,7 @@ export type CountdownState = { row: CountdownRow | null; title: string | null; l
 export const countdownStore = createStore<CountdownState>({ row: null, title: null, loaded: false, error: false });
 
 export async function loadCountdown(key: Uint8Array | null): Promise<void> {
-  const { data, error } = await supabase.from('countdowns').select('*').order('target_at', { ascending: true });
+  const { data, error } = await api.from('countdowns').select('*').order('target_at', { ascending: true });
   if (error) {
     countdownStore.set((s) => ({ ...s, loaded: true, error: true }));
     return;
@@ -93,7 +93,7 @@ export function useMissYouToday(): { mine: number; theirs: number; loading: bool
   useEffect(() => {
     if (!coupleId) return;
     let alive = true;
-    supabase
+    api
       .from('miss_you_events')
       .select('*')
       .gte('created_at', dayStartUtc(new Date(), tz).toISOString())
@@ -119,7 +119,7 @@ export function useMissYouToday(): { mine: number; theirs: number; loading: bool
 /** One tap: log it, buzz them live (if open), push them (if closed). */
 export async function sendMissYou(coupleId: string): Promise<boolean> {
   broadcast('miss_you', { at: Date.now() });
-  const { error } = await supabase.from('miss_you_events').insert({ couple_id: coupleId });
+  const { error } = await api.from('miss_you_events').insert({ couple_id: coupleId });
   if (error) return false;
   notifyPartner('miss_you');
   return true;

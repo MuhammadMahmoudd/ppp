@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { broadcast } from '@/lib/realtime';
 import { notifyPartner } from '@/lib/push';
 import type { GameType, Heat, MemberRow } from '@/lib/database.types';
@@ -26,7 +26,7 @@ export async function startGame(o: {
   if (!players) throw new Error('not_paired');
   const state = initialState(o.game, players, o.me, { heat: o.heat, dice: o.dice });
   const sealed = sealWire(state, 'invited', o.key);
-  const { data, error } = await supabase
+  const { data, error } = await api
     .from('game_sessions')
     .insert({ couple_id: o.coupleId, game_type: o.game, state_ciphertext: sealed.c, state_nonce: sealed.n, turn_user_id: o.me })
     .select('id')
@@ -39,5 +39,5 @@ export async function startGame(o: {
 
 export async function cancelGame(id: string, version: number, key: Uint8Array, state: unknown): Promise<void> {
   const s = sealWire(state as never, 'cancelled', key);
-  await supabase.rpc('game_apply', { p_id: id, p_expected_version: version, p_state_ciphertext: s.c, p_state_nonce: s.n, p_status: 'cancelled' });
+  await api.rpc('game_apply', { p_id: id, p_expected_version: version, p_state_ciphertext: s.c, p_state_nonce: s.n, p_status: 'cancelled' });
 }

@@ -11,7 +11,7 @@ import { Txt } from '@/components/Txt';
 import { colors, space } from '@/lib/theme';
 import { useStrings } from '@/lib/i18n';
 import { useSession } from '@/lib/session';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { sealString } from '@/lib/crypto';
 import { addDays, dayKey, formatClock } from '@/lib/time';
 import { postMessage } from '@/lib/messages';
@@ -46,16 +46,16 @@ export default function NewEnvelope() {
     setErr(null);
     try {
       const t = sealString(title.trim(), sharedKey);
-      const { data, error } = await supabase
+      const { data, error } = await api
         .from('envelopes')
         .insert({ couple_id: couple.id, kind, title_ciphertext: t.c, title_nonce: t.n, unlock_at: unlockAt?.toISOString() ?? null })
         .select('id')
         .single();
       if (error || !data) throw error ?? new Error('insert');
       const l = sealString(letter, sharedKey);
-      const c = await supabase.from('envelope_contents').insert({ envelope_id: data.id, couple_id: couple.id, ciphertext: l.c, nonce: l.n });
+      const c = await api.from('envelope_contents').insert({ envelope_id: data.id, couple_id: couple.id, ciphertext: l.c, nonce: l.n });
       if (c.error) {
-        await supabase.from('envelopes').delete().eq('id', data.id);
+        await api.from('envelopes').delete().eq('id', data.id);
         throw c.error;
       }
       await postMessage({ coupleId: couple.id, senderId: userId, key: sharedKey, type: 'envelope', body: { t: 'envelope', envelopeId: data.id, title: title.trim() } });

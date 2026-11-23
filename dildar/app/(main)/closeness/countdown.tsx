@@ -17,7 +17,7 @@ import { ErrorState, Skeleton } from '@/components/States';
 import { colors, space } from '@/lib/theme';
 import { fmt, useStrings } from '@/lib/i18n';
 import { useSession } from '@/lib/session';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { sealString, tryOpenString } from '@/lib/crypto';
 import { dayKey, formatClock } from '@/lib/time';
 import { haptic } from '@/lib/haptics';
@@ -62,8 +62,8 @@ export default function CountdownScreen() {
     const sealed = tTitle.trim() ? sealString(tTitle.trim(), sharedKey) : null;
     const patch = { target_at: at.toISOString(), title_ciphertext: sealed?.c ?? null, title_nonce: sealed?.n ?? null };
     const res = row && !arrived
-      ? await supabase.from('countdowns').update(patch).eq('id', row.id)
-      : await supabase.from('countdowns').insert({ couple_id: couple.id, ...patch });
+      ? await api.from('countdowns').update(patch).eq('id', row.id)
+      : await api.from('countdowns').insert({ couple_id: couple.id, ...patch });
     setBusy(false);
     if (res.error) {
       haptic.error();
@@ -78,7 +78,7 @@ export default function CountdownScreen() {
     row &&
     Alert.alert(c.deleteConfirm, undefined, [
       { text: s.common.cancel, style: 'cancel' },
-      { text: c.delete, style: 'destructive', onPress: async () => { await supabase.from('countdowns').delete().eq('id', row.id); haptic.warning(); await reload(); } },
+      { text: c.delete, style: 'destructive', onPress: async () => { await api.from('countdowns').delete().eq('id', row.id); haptic.warning(); await reload(); } },
     ]);
 
   if (!loaded) return <Screen header={<Header title={c.title} />}><View style={styles.pad}><Skeleton height={160} /></View></Screen>;
@@ -133,7 +133,7 @@ function Plan({ countdownId, coupleId, userId, sharedKey, arrived }: { countdown
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
   const q = useAsync(async () => {
-    const { data, error } = await supabase.from('plan_items').select('*').eq('countdown_id', countdownId).order('created_at');
+    const { data, error } = await api.from('plan_items').select('*').eq('countdown_id', countdownId).order('created_at');
     if (error) throw error;
     return data ?? [];
   }, [countdownId, arrived]);
@@ -146,7 +146,7 @@ function Plan({ countdownId, coupleId, userId, sharedKey, arrived }: { countdown
     if (!sharedKey || !text.trim()) return;
     setBusy(true);
     const sealed = sealString(text.trim(), sharedKey);
-    const { error } = await supabase.from('plan_items').insert({ countdown_id: countdownId, couple_id: coupleId, ciphertext: sealed.c, nonce: sealed.n });
+    const { error } = await api.from('plan_items').insert({ countdown_id: countdownId, couple_id: coupleId, ciphertext: sealed.c, nonce: sealed.n });
     setBusy(false);
     if (!error) {
       haptic.success();
@@ -167,7 +167,7 @@ function Plan({ countdownId, coupleId, userId, sharedKey, arrived }: { countdown
       {mine.map((i) => (
         <View key={i.id} style={styles.item}>
           <Txt style={styles.flex}>{i.text ?? s.states.decryptFailed}</Txt>
-          <IconButton name="trash-outline" size={16} label={s.common.delete} glass={false} onPress={async () => { await supabase.from('plan_items').delete().eq('id', i.id); q.reload(); }} />
+          <IconButton name="trash-outline" size={16} label={s.common.delete} glass={false} onPress={async () => { await api.from('plan_items').delete().eq('id', i.id); q.reload(); }} />
         </View>
       ))}
 

@@ -6,7 +6,7 @@
  */
 import { openBytes, sealBytes, toB64 } from './crypto';
 import { uuid } from './ids';
-import { supabase, type Bucket } from './supabase';
+import { api, type Bucket } from './api';
 import { downloadCipher, readFileBytes } from './fileio';
 
 export { readFileBytes, writeTempFile, deleteTempFile, wipeTemp } from './fileio';
@@ -22,7 +22,7 @@ export async function encryptAndUpload(
   const plain = typeof source === 'string' ? await readFileBytes(source) : source;
   const { cipher, nonce } = sealBytes(plain, key);
   const path = `${coupleId}/${uuid()}`;
-  const { error } = await supabase.storage.from(bucket).upload(path, cipher.buffer as ArrayBuffer, {
+  const { error } = await api.storage.from(bucket).upload(path, cipher.buffer as ArrayBuffer, {
     contentType: 'application/octet-stream',
     upsert: false,
   });
@@ -40,7 +40,7 @@ export function bytesToDataUri(bytes: Uint8Array, mime = 'image/jpeg'): string {
 }
 
 export async function removeObjects(bucket: Bucket, paths: string[]): Promise<void> {
-  if (paths.length) await supabase.storage.from(bucket).remove(paths);
+  if (paths.length) await api.storage.from(bucket).remove(paths);
 }
 
 // Small LRU of decrypted image data URIs so chat scrolling stays smooth.

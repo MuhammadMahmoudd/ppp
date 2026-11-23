@@ -2,7 +2,7 @@
  * Web file I/O for lib/media.ts. Decrypted media lives only in memory as
  * blob: URLs, which are revoked when the viewer closes.
  */
-import { supabase, type Bucket } from './supabase';
+import { api, type Bucket } from './api';
 
 const MIME: Record<string, string> = {
   mp4: 'video/mp4', mov: 'video/quicktime', webm: 'video/webm',
@@ -17,7 +17,7 @@ export async function readFileBytes(uri: string): Promise<Uint8Array> {
 }
 
 export async function downloadCipher(bucket: Bucket, path: string): Promise<Uint8Array> {
-  const { data, error } = await supabase.storage.from(bucket).download(path);
+  const { data, error } = await api.storage.from(bucket).download(path);
   if (error || !data) throw error ?? new Error('download_failed');
   return new Uint8Array(await data.arrayBuffer());
 }

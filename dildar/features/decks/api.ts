@@ -2,7 +2,7 @@
  * Decks & cards: names and card text are E2E-encrypted with the couple key.
  * RLS shows a deck/card only to its owner until it is shared.
  */
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { sealString, tryOpenString } from '@/lib/crypto';
 import type { CardRow, DeckKind, DeckRow, Heat } from '@/lib/database.types';
 
@@ -11,8 +11,8 @@ export type CardView = { id: string; deckId: string; kind: DeckKind; heat: Heat;
 
 export async function fetchDecks(key: Uint8Array, me: string): Promise<{ decks: DeckView[]; cards: CardView[] }> {
   const [d, c] = await Promise.all([
-    supabase.from('decks').select('*').order('created_at', { ascending: true }),
-    supabase.from('cards').select('*').order('created_at', { ascending: true }),
+    api.from('decks').select('*').order('created_at', { ascending: true }),
+    api.from('cards').select('*').order('created_at', { ascending: true }),
   ]);
   if (d.error) throw d.error;
   if (c.error) throw c.error;
@@ -38,7 +38,7 @@ export async function fetchDecks(key: Uint8Array, me: string): Promise<{ decks: 
 
 export async function createDeck(coupleId: string, kind: DeckKind, name: string, key: Uint8Array): Promise<string> {
   const s = sealString(name.trim(), key);
-  const { data, error } = await supabase
+  const { data, error } = await api
     .from('decks')
     .insert({ couple_id: coupleId, kind, name_ciphertext: s.c, name_nonce: s.n })
     .select('id')
@@ -49,17 +49,17 @@ export async function createDeck(coupleId: string, kind: DeckKind, name: string,
 
 export async function renameDeck(id: string, name: string, key: Uint8Array): Promise<void> {
   const s = sealString(name.trim(), key);
-  const { error } = await supabase.from('decks').update({ name_ciphertext: s.c, name_nonce: s.n }).eq('id', id);
+  const { error } = await api.from('decks').update({ name_ciphertext: s.c, name_nonce: s.n }).eq('id', id);
   if (error) throw error;
 }
 
 export async function setDeckShared(id: string, shared: boolean): Promise<void> {
-  const { error } = await supabase.rpc('set_deck_shared', { p_deck: id, p_shared: shared });
+  const { error } = await api.rpc('set_deck_shared', { p_deck: id, p_shared: shared });
   if (error) throw error;
 }
 
 export async function deleteDeck(id: string): Promise<void> {
-  const { error } = await supabase.from('decks').delete().eq('id', id);
+  const { error } = await api.from('decks').delete().eq('id', id);
   if (error) throw error;
 }
 
@@ -76,7 +76,7 @@ export async function addCards(
   });
   // chunk to keep requests small
   for (let i = 0; i < rows.length; i += 100) {
-    const { error } = await supabase.from('cards').insert(rows.slice(i, i + 100));
+    const { error } = await api.from('cards').insert(rows.slice(i, i + 100));
     if (error) throw error;
   }
   return rows.length;
@@ -91,11 +91,11 @@ export async function updateCard(id: string, patch: { text?: string; heat?: Heat
   }
   if (patch.heat != null) upd.heat = patch.heat;
   if (patch.category != null) upd.category = patch.category.slice(0, 40);
-  const { error } = await supabase.from('cards').update(upd).eq('id', id);
+  const { error } = await api.from('cards').update(upd).eq('id', id);
   if (error) throw error;
 }
 
 export async function deleteCard(id: string): Promise<void> {
-  const { error } = await supabase.from('cards').delete().eq('id', id);
+  const { error } = await api.from('cards').delete().eq('id', id);
   if (error) throw error;
 }

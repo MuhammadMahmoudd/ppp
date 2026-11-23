@@ -17,7 +17,7 @@ import { useStrings } from '@/lib/i18n';
 import { useReducedMotion } from '@/lib/settings';
 import { useSession } from '@/lib/session';
 import { subscribeTable } from '@/lib/realtime';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { haptic } from '@/lib/haptics';
 import { decodeBody, type MessageMeta } from '@/lib/messages';
 import type { Heat, MessageRow } from '@/lib/database.types';
@@ -46,7 +46,7 @@ export function TonightGlow() {
   // Latest unanswered signal from the partner (on mount / foreground).
   useEffect(() => {
     if (!coupleId || !userId || !spicyActive) return;
-    supabase
+    api
       .from('messages')
       .select('*')
       .eq('type', 'tonight')

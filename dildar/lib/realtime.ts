@@ -7,7 +7,7 @@
  * any time because we register a single wildcard listener up front.
  */
 import type { RealtimeChannel } from '@supabase/supabase-js';
-import { supabase } from './supabase';
+import { api } from './api';
 import { createStore, useStore } from './store';
 import { sealJSON, tryOpenJSON, type Sealed } from './crypto';
 
@@ -27,7 +27,7 @@ export function connectCoupleChannel(coupleId: string, userId: string): void {
   disconnectCoupleChannel();
   me = userId;
   channelCouple = coupleId;
-  const ch = supabase.channel(`couple:${coupleId}`, {
+  const ch = api.channel(`couple:${coupleId}`, {
     config: { private: true, broadcast: { self: false, ack: false }, presence: { key: userId } },
   });
   ch.on('broadcast', { event: '*' }, (msg) => {
@@ -51,7 +51,7 @@ export function connectCoupleChannel(coupleId: string, userId: string): void {
 }
 
 export function disconnectCoupleChannel(): void {
-  if (channel) supabase.removeChannel(channel).catch(() => undefined);
+  if (channel) api.removeChannel(channel).catch(() => undefined);
   channel = null;
   channelCouple = null;
   presenceStore.set({ partnerOnline: false, partnerScreen: null, connected: false });
@@ -96,7 +96,7 @@ export function subscribeTable<T extends Record<string, unknown>>(
   cb: (change: { eventType: 'INSERT' | 'UPDATE' | 'DELETE'; new: T; old: Partial<T> }) => void,
   filterColumn = 'couple_id',
 ): () => void {
-  const ch = supabase
+  const ch = api
     .channel(`db:${table}:${coupleId}:${Math.random().toString(36).slice(2, 8)}`)
     .on(
       'postgres_changes' as never,
@@ -105,6 +105,6 @@ export function subscribeTable<T extends Record<string, unknown>>(
     )
     .subscribe();
   return () => {
-    supabase.removeChannel(ch).catch(() => undefined);
+    api.removeChannel(ch).catch(() => undefined);
   };
 }

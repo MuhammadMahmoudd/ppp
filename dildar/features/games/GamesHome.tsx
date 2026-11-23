@@ -12,7 +12,7 @@ import { colors, gradients, radius, space } from '@/lib/theme';
 import { fmt, relativeTime, useStrings } from '@/lib/i18n';
 import { useSession } from '@/lib/session';
 import { haptic } from '@/lib/haptics';
-import { errorCode } from '@/lib/supabase';
+import { errorCode } from '@/lib/api';
 import type { GameStatus, GameType } from '@/lib/database.types';
 import { useChromeInsets } from '@/features/home/chrome';
 import { useDecks } from '@/features/decks/useDecks';

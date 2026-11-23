@@ -18,7 +18,7 @@ import { EmptyState, ErrorState, SkeletonList } from '@/components/States';
 import { colors, radius, space } from '@/lib/theme';
 import { useStrings } from '@/lib/i18n';
 import { useSession } from '@/lib/session';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { sealJSON, tryOpenJSON } from '@/lib/crypto';
 import { dayKey } from '@/lib/time';
 import { haptic } from '@/lib/haptics';
@@ -43,7 +43,7 @@ export default function SharedList() {
   const [err, setErr] = useState<string | null>(null);
 
   const q = useAsync(async () => {
-    const { data, error } = await supabase.from('shared_items').select('*').eq('kind', kind).order('created_at', { ascending: false });
+    const { data, error } = await api.from('shared_items').select('*').eq('kind', kind).order('created_at', { ascending: false });
     if (error) throw error;
     return data ?? [];
   }, [kind]);
@@ -65,7 +65,7 @@ export default function SharedList() {
     setBusy(true);
     setErr(null);
     const sealed = sealJSON({ text: text.trim() } satisfies Body, sharedKey);
-    const { error } = await supabase.from('shared_items').insert({
+    const { error } = await api.from('shared_items').insert({
       couple_id: couple.id, kind, ciphertext: sealed.c, nonce: sealed.n,
       happened_on: kind === 'memory' ? date : null,
     });
@@ -82,7 +82,7 @@ export default function SharedList() {
   const toggleDone = async (r: SharedItemRow) => {
     const apply = async () => {
       haptic.success();
-      await supabase.from('shared_items').update({ done_at: r.done_at ? null : new Date().toISOString() }).eq('id', r.id);
+      await api.from('shared_items').update({ done_at: r.done_at ? null : new Date().toISOString() }).eq('id', r.id);
       q.reload();
     };
     if (kind === 'coupon' && !r.done_at) {
@@ -93,7 +93,7 @@ export default function SharedList() {
   const remove = (r: SharedItemRow) =>
     Alert.alert(l.deleteConfirm, undefined, [
       { text: s.common.cancel, style: 'cancel' },
-      { text: s.common.delete, style: 'destructive', onPress: async () => { haptic.warning(); await supabase.from('shared_items').delete().eq('id', r.id); q.reload(); } },
+      { text: s.common.delete, style: 'destructive', onPress: async () => { haptic.warning(); await api.from('shared_items').delete().eq('id', r.id); q.reload(); } },
     ]);
 
   return (

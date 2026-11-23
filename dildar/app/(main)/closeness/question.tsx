@@ -17,7 +17,7 @@ import { colors, space } from '@/lib/theme';
 import { fmt, useStrings } from '@/lib/i18n';
 import { useSettings } from '@/lib/settings';
 import { useSession } from '@/lib/session';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { sealString, tryOpenString } from '@/lib/crypto';
 import { subscribeTable } from '@/lib/realtime';
 import { haptic } from '@/lib/haptics';
@@ -48,7 +48,7 @@ export default function DailyQuestion() {
 
   const answers = useAsync(async () => {
     if (!couple) return [] as DailyAnswerRow[];
-    const { data, error } = await supabase.from('daily_answers').select('*').eq('couple_id', couple.id).eq('day', day).eq('pool', pool);
+    const { data, error } = await api.from('daily_answers').select('*').eq('couple_id', couple.id).eq('day', day).eq('pool', pool);
     if (error) throw error;
     return data ?? [];
   }, [couple?.id, day, pool]);
@@ -67,7 +67,7 @@ export default function DailyQuestion() {
     if (!couple || !sharedKey || !text.trim()) return;
     setBusy(true);
     const sealed = sealString(text.trim(), sharedKey);
-    const { error } = await supabase.from('daily_answers').insert({
+    const { error } = await api.from('daily_answers').insert({
       couple_id: couple.id, day, pool, question_idx: idx, ciphertext: sealed.c, nonce: sealed.n,
     });
     setBusy(false);

@@ -10,7 +10,7 @@ import { Pressy } from '@/components/Pressy';
 import { colors, radius, space } from '@/lib/theme';
 import { useStrings } from '@/lib/i18n';
 import { useSession } from '@/lib/session';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { encryptAndUpload, cacheClear } from '@/lib/media';
 import { COMMON_TIMEZONES, deviceTimeZone, isValidTimeZone } from '@/lib/time';
 import { haptic } from '@/lib/haptics';
@@ -35,8 +35,8 @@ export function ProfileForm({ onDone, submitLabel }: { onDone?: () => void; subm
     setUploading(true);
     try {
       const up = await encryptAndUpload('avatars', couple.id, r.assets[0].uri, sharedKey);
-      if (me?.avatar_path) supabase.storage.from('avatars').remove([me.avatar_path]).catch(() => undefined);
-      await supabase.from('profiles').update({ avatar_path: up.path, avatar_nonce: up.nonce }).eq('user_id', userId);
+      if (me?.avatar_path) api.storage.from('avatars').remove([me.avatar_path]).catch(() => undefined);
+      await api.from('profiles').update({ avatar_path: up.path, avatar_nonce: up.nonce }).eq('user_id', userId);
       cacheClear();
       await refresh();
       haptic.success();
@@ -56,13 +56,13 @@ export function ProfileForm({ onDone, submitLabel }: { onDone?: () => void; subm
     if (anniversary && !DATE_RE.test(anniversary)) return setError(s.profile.anniversary);
     setBusy(true);
     try {
-      const { error: e } = await supabase
+      const { error: e } = await api
         .from('profiles')
         .update({ display_name: name.trim(), timezone: tz, birthday: birthday || null })
         .eq('user_id', userId);
       if (e) throw e;
       if (anniversary && anniversary !== couple?.anniversary) {
-        await supabase.rpc('update_couple_settings', { p_anniversary: anniversary });
+        await api.rpc('update_couple_settings', { p_anniversary: anniversary });
       }
       await refresh();
       haptic.success();

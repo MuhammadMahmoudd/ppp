@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { postMessage } from '@/lib/messages';
 import { notifyPartner } from '@/lib/push';
 import type { Heat } from '@/lib/database.types';
@@ -9,7 +9,7 @@ export async function sendTonight(o: { coupleId: string; senderId: string; key: 
 }
 
 export async function answerTonight(messageId: string, answer: 'yes' | 'no'): Promise<void> {
-  const { error } = await supabase.rpc('answer_signal', { message_id: messageId, answer });
+  const { error } = await api.rpc('answer_signal', { message_id: messageId, answer });
   if (error) throw error;
   notifyPartner('tonight');
 }

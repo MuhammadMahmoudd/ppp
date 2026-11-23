@@ -12,7 +12,7 @@ import { ErrorState, Skeleton } from '@/components/States';
 import { colors, radius, space } from '@/lib/theme';
 import { fmt, num, useStrings } from '@/lib/i18n';
 import { useSession } from '@/lib/session';
-import { supabase, errorCode } from '@/lib/supabase';
+import { api, errorCode } from '@/lib/api';
 import { subscribeTable } from '@/lib/realtime';
 import { addDays, dayKey, splitDuration } from '@/lib/time';
 import { MILESTONES, coupleLevel, freezesAvailable, streakStatus } from '@/lib/streak';
@@ -35,7 +35,7 @@ export function StreakScreen() {
     if (!couple) return;
     setFailed(false);
     const since = addDays(dayKey(new Date(), couple.home_timezone), -13);
-    const { data, error } = await supabase.from('streak_days').select('*').eq('couple_id', couple.id).gte('day', since).order('day');
+    const { data, error } = await api.from('streak_days').select('*').eq('couple_id', couple.id).gte('day', since).order('day');
     if (error) setFailed(true);
     else setDays(data ?? []);
   }, [couple]);
@@ -64,7 +64,7 @@ export function StreakScreen() {
   const applyFreeze = async () => {
     setBusy(true);
     setMsg(null);
-    const { error } = await supabase.rpc('use_streak_freeze');
+    const { error } = await api.rpc('use_streak_freeze');
     setBusy(false);
     if (error) {
       haptic.error();

@@ -5,7 +5,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppState } from 'react-native';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { subscribeTable, onBroadcast, broadcast } from '@/lib/realtime';
 import { useOutbox, decodeBody, type MessageBody, type OutgoingMessage } from '@/lib/messages';
 import { queueStore } from '@/lib/offlineQueue';
@@ -67,7 +67,7 @@ export function useChat(coupleId: string, me: string, key: Uint8Array | null, ac
     if (!left.length) return;
     setGhosts((g) => [...g, ...left]);
     // fetch them directly in case the realtime echo is slow or missed
-    supabase.from('messages').select(COLS).in('id', left.map((l) => l.id)).then(({ data }) => {
+    api.from('messages').select(COLS).in('id', left.map((l) => l.id)).then(({ data }) => {
       if (data) setRows((rs) => (data as ChatRow[]).reduce(upsertRow, rs));
     });
     ghostTimers.current.push(setTimeout(() => setGhosts((g) => g.filter((x) => !left.some((l) => l.id === x.id))), 12_000));
@@ -75,13 +75,13 @@ export function useChat(coupleId: string, me: string, key: Uint8Array | null, ac
 
   const loadReactions = useCallback(async (ids: string[]) => {
     if (!ids.length) return;
-    const { data } = await supabase.from('message_reactions').select('*').in('message_id', ids);
+    const { data } = await api.from('message_reactions').select('*').in('message_id', ids);
     if (data) setReactions((rs) => [...rs.filter((r) => !ids.includes(r.message_id)), ...data]);
   }, []);
 
   const load = useCallback(async () => {
     setError(false);
-    const { data, error: e } = await supabase.from('messages').select(COLS).eq('couple_id', coupleId).order('created_at', { ascending: false }).limit(PAGE);
+    const { data, error: e } = await api.from('messages').select(COLS).eq('couple_id', coupleId).order('created_at', { ascending: false }).limit(PAGE);
     if (e) {
       setError(true);
       setLoading(false);
@@ -102,7 +102,7 @@ export function useChat(coupleId: string, me: string, key: Uint8Array | null, ac
     if (loadingMore || !hasMore || !rows.length) return;
     setLoadingMore(true);
     const oldest = rows.reduce((a, b) => (a.created_at < b.created_at ? a : b)).created_at;
-    const { data } = await supabase.from('messages').select(COLS).eq('couple_id', coupleId).lt('created_at', oldest).order('created_at', { ascending: false }).limit(PAGE);
+    const { data } = await api.from('messages').select(COLS).eq('couple_id', coupleId).lt('created_at', oldest).order('created_at', { ascending: false }).limit(PAGE);
     const list = (data ?? []) as ChatRow[];
     setRows((rs) => [...rs, ...list.filter((l) => !rs.some((r) => r.id === l.id))]);
     setHasMore(list.length === PAGE);
@@ -159,7 +159,7 @@ export function useChat(coupleId: string, me: string, key: Uint8Array | null, ac
   useEffect(() => {
     if (!active || !unseen || AppState.currentState !== 'active') return;
     const t = setTimeout(() => {
-      supabase.rpc('mark_messages_seen').then(() => undefined);
+      api.rpc('mark_messages_seen').then(() => undefined);
     }, 400);
     return () => clearTimeout(t);
   }, [active, unseen, rows.length]);

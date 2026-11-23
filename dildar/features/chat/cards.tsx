@@ -12,7 +12,7 @@ import { colors, gradients, radius, space } from '@/lib/theme';
 import { fmt, num, useStrings } from '@/lib/i18n';
 import { splitDuration } from '@/lib/time';
 import { playPattern } from '@/lib/haptics';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import type { MessageBody } from '@/lib/messages';
 import { answerTonight, completeDare } from './actions';
 import type { MsgItem } from './model';
@@ -104,7 +104,7 @@ function SnapCard({ item, body }: { item: MsgItem; body: Extract<MessageBody, { 
   useEffect(() => {
     if (opened) return;
     let alive = true;
-    supabase.from('snaps').select('opened_at').eq('id', body.snapId).maybeSingle().then(({ data }) => {
+    api.from('snaps').select('opened_at').eq('id', body.snapId).maybeSingle().then(({ data }) => {
       const o = !!data?.opened_at || !data;
       snapOpenedCache.set(body.snapId, o);
       if (alive) setOpened(o);

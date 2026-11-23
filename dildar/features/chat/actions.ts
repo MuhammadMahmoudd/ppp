@@ -2,7 +2,7 @@
 import { Alert } from 'react-native';
 import { postMessage, type MessageBody } from '@/lib/messages';
 import { encryptAndUpload, removeObjects } from '@/lib/media';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { haptic } from '@/lib/haptics';
 import { uuid } from '@/lib/ids';
 import { broadcast } from '@/lib/realtime';
@@ -73,10 +73,10 @@ export function dismissUpload(id: string) {
 export async function react(ctx: ChatCtx, messageId: string, emoji: string, current?: string | null) {
   haptic.tap();
   if (current === emoji) {
-    await supabase.from('message_reactions').delete().eq('message_id', messageId).eq('user_id', ctx.userId);
+    await api.from('message_reactions').delete().eq('message_id', messageId).eq('user_id', ctx.userId);
     return;
   }
-  await supabase
+  await api
     .from('message_reactions')
     .upsert({ message_id: messageId, user_id: ctx.userId, couple_id: ctx.coupleId, emoji }, { onConflict: 'message_id,user_id' });
 }
@@ -89,7 +89,7 @@ export function confirmDelete(messageId: string, onDone?: () => void) {
       text: s.common.delete,
       style: 'destructive',
       onPress: async () => {
-        const { data, error } = await supabase.rpc('delete_message', { message_id: messageId });
+        const { data, error } = await api.rpc('delete_message', { message_id: messageId });
         if (!error) {
           haptic.success();
           if (data) removeObjects('chat-media', [data]).catch(() => undefined);
@@ -101,13 +101,13 @@ export function confirmDelete(messageId: string, onDone?: () => void) {
 }
 
 export async function completeDare(messageId: string, proofMessageId?: string | null) {
-  const { error } = await supabase.rpc('complete_dare', proofMessageId ? { message_id: messageId, proof_message_id: proofMessageId } : { message_id: messageId });
+  const { error } = await api.rpc('complete_dare', proofMessageId ? { message_id: messageId, proof_message_id: proofMessageId } : { message_id: messageId });
   if (error) haptic.error();
   else haptic.success();
 }
 
 export async function answerTonight(messageId: string, answer: 'yes' | 'no') {
-  const { error } = await supabase.rpc('answer_signal', { message_id: messageId, answer });
+  const { error } = await api.rpc('answer_signal', { message_id: messageId, answer });
   if (error) haptic.error();
   else haptic.success();
 }

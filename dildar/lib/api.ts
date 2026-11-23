@@ -7,11 +7,11 @@ import { encryptedStorage } from './secureStorage';
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
 const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
-export const supabaseConfigured = /^https:\/\/.+/.test(url) && anonKey.length > 20 && !url.includes('YOUR-PROJECT');
+export const apiConfigured = /^https:\/\/.+/.test(url) && anonKey.length > 20 && !url.includes('YOUR-PROJECT');
 
-export const supabase: SupabaseClient<Database> = createClient<Database>(
-  supabaseConfigured ? url : 'https://not-configured.invalid',
-  supabaseConfigured ? anonKey : 'not-configured',
+export const api: SupabaseClient<Database> = createClient<Database>(
+  apiConfigured ? url : 'https://not-configured.invalid',
+  apiConfigured ? anonKey : 'not-configured',
   {
     auth: {
       storage: encryptedStorage,
@@ -25,8 +25,8 @@ export const supabase: SupabaseClient<Database> = createClient<Database>(
 
 // Refresh tokens only while the app is in the foreground.
 AppState.addEventListener('change', (state) => {
-  if (state === 'active') supabase.auth.startAutoRefresh();
-  else supabase.auth.stopAutoRefresh();
+  if (state === 'active') api.auth.startAutoRefresh();
+  else api.auth.stopAutoRefresh();
 });
 
 /** Turns a PostgREST/RPC error into a short code we can translate. */

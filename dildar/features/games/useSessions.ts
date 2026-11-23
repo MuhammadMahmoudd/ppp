@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { subscribeTable } from '@/lib/realtime';
 import { useSession } from '@/lib/session';
 import type { GameSessionRow } from '@/lib/database.types';
@@ -14,7 +14,7 @@ export function useGameSessions() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const load = useCallback(async () => {
-    const { data, error: e } = await supabase
+    const { data, error: e } = await api
       .from('game_sessions')
       .select('id, game_type, status, created_by, created_at, updated_at')
       .order('updated_at', { ascending: false })

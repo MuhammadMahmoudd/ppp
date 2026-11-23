@@ -6,7 +6,7 @@
  */
 import { useEffect } from 'react';
 import * as ScreenCapture from 'expo-screen-capture';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { useSession } from '@/lib/session';
 import { uuid } from '@/lib/ids';
 import { sealJSON } from '@/lib/crypto';
@@ -14,9 +14,9 @@ import { notifyPartner } from '@/lib/push';
 import type { ScreenshotContext } from '@/lib/database.types';
 
 export async function reportScreenshot(coupleId: string, key: Uint8Array | null, context: ScreenshotContext, targetId?: string) {
-  await supabase.from('screenshot_events').insert({ couple_id: coupleId, context, target_id: targetId ?? null });
+  await api.from('screenshot_events').insert({ couple_id: coupleId, context, target_id: targetId ?? null });
   const body = key ? sealJSON({ context }, key) : null;
-  await supabase.from('messages').insert({
+  await api.from('messages').insert({
     id: uuid(),
     couple_id: coupleId,
     type: 'screenshot',

@@ -57,13 +57,17 @@
     "tweetnacl-util": "^0.15.1"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261123.1",
     "@electric-sql/pglite": "^0.5.17",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.20.5",
     "@types/react": "~19.3.0",
+    "esbuild": "^0.28.2",
     "jest": "^30.5.2",
     "jest-expo": "^58.0.15",
-    "typescript": "~6.0.3"
+    "miniflare": "^4.20260730.0",
+    "typescript": "~6.0.3",
+    "wrangler": "^4.167.0"
   },
   "scripts": {
     "start": "expo start --dev-client",

@@ -15,7 +15,7 @@ import { useSession } from '@/lib/session';
 import { safetyCode } from '@/lib/crypto';
 import { uploadBackup } from '@/lib/keys';
 import { setPushPreviews } from '@/lib/push';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { haptic } from '@/lib/haptics';
 import { authenticate } from '@/features/lock/lockStore';
 
@@ -31,7 +31,7 @@ export default function SecuritySettings() {
 
   React.useEffect(() => {
     if (!userId) return;
-    supabase.from('devices').select('push_previews').eq('user_id', userId).maybeSingle().then(({ data }) => setPreviews(!!data?.push_previews));
+    api.from('devices').select('push_previews').eq('user_id', userId).maybeSingle().then(({ data }) => setPreviews(!!data?.push_previews));
   }, [userId]);
 
   const backup = async () => {

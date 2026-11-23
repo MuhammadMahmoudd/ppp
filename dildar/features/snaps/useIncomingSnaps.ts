@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { subscribeTable } from '@/lib/realtime';
 import type { SnapRow } from '@/lib/database.types';
 
@@ -10,7 +10,7 @@ export function useIncomingSnaps(coupleId: string | null, userId: string | null)
 
   const load = useCallback(async () => {
     if (!coupleId || !userId) return;
-    const { data } = await supabase
+    const { data } = await api
       .from('snaps')
       .select('*')
       .eq('couple_id', coupleId)
@@ -35,7 +35,7 @@ export function useIncomingSnaps(coupleId: string | null, userId: string | null)
 
 /** Next unopened snap id after `currentId` (for "tap → next"). */
 export async function nextUnopenedSnap(coupleId: string, userId: string, currentId: string): Promise<string | null> {
-  const { data } = await supabase
+  const { data } = await api
     .from('snaps')
     .select('id')
     .eq('couple_id', coupleId)

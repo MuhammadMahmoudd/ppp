@@ -9,7 +9,7 @@ import { colors, radius, space } from '@/lib/theme';
 import { fmt, useStrings } from '@/lib/i18n';
 import { formatClock } from '@/lib/time';
 import { usePresence } from '@/lib/realtime';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import type { DisappearMode, ProfileRow } from '@/lib/database.types';
 
 const NEXT: Record<DisappearMode, DisappearMode> = { off: 'view', view: '24h', '24h': 'off' };
@@ -49,7 +49,7 @@ export function ChatHeader({ partner, typing, mode }: { partner: ProfileRow | nu
       <Pressy
         hapticStyle="select"
         accessibilityLabel={s.chat.disappear[mode]}
-        onPress={() => supabase.rpc('update_couple_settings', { p_chat_disappear_mode: NEXT[mode] })}
+        onPress={() => api.rpc('update_couple_settings', { p_chat_disappear_mode: NEXT[mode] })}
         style={[styles.mode, mode !== 'off' && styles.modeOn]}
       >
         <Ionicons name={mode === 'off' ? 'infinite' : 'timer'} size={14} color={colors.text} />

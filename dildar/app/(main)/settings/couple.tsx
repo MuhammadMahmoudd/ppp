@@ -10,7 +10,7 @@ import { ListRow, Divider } from '@/components/ListRow';
 import { colors, space } from '@/lib/theme';
 import { fmt, useStrings } from '@/lib/i18n';
 import { useSession } from '@/lib/session';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { COMMON_TIMEZONES, formatClock, isValidTimeZone } from '@/lib/time';
 import { haptic } from '@/lib/haptics';
 import { Chip } from '@/features/profile/ProfileForm';
@@ -26,13 +26,13 @@ export default function CoupleSettings() {
   const saveTz = async () => {
     if (!isValidTimeZone(tz)) return setError(s.profile.timezone);
     setBusy(true);
-    const { error: e } = await supabase.rpc('update_couple_settings', { p_home_timezone: tz });
+    const { error: e } = await api.rpc('update_couple_settings', { p_home_timezone: tz });
     setBusy(false);
     if (e) setError(s.auth.errors.generic);
     else haptic.success();
   };
   const setMode = async (m: DisappearMode) => {
-    await supabase.rpc('update_couple_settings', { p_chat_disappear_mode: m });
+    await api.rpc('update_couple_settings', { p_chat_disappear_mode: m });
   };
   const modes: [DisappearMode, string][] = [['off', s.settings.disappearOff], ['view', s.settings.disappearView], ['24h', s.settings.disappear24h]];
 
@@ -59,7 +59,7 @@ export default function CoupleSettings() {
         <ListRow
           icon="lock-closed-outline"
           title={s.settings.vaultProtection}
-          toggle={{ value: !!couple?.vault_delete_protection, onChange: (v) => supabase.rpc('update_couple_settings', { p_vault_delete_protection: v }) }}
+          toggle={{ value: !!couple?.vault_delete_protection, onChange: (v) => api.rpc('update_couple_settings', { p_vault_delete_protection: v }) }}
         />
         <Divider />
       </Glass>

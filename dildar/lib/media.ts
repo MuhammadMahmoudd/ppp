@@ -4,16 +4,14 @@
  * Images render from a data: URI (never written to disk in plaintext);
  * video/audio need a file, so they go to a temp dir that is wiped after use.
  */
-import { Directory, File, Paths } from 'expo-file-system';
 import { openBytes, sealBytes, toB64 } from './crypto';
 import { uuid } from './ids';
 import { supabase, type Bucket } from './supabase';
+import { downloadCipher, readFileBytes } from './fileio';
+
+export { readFileBytes, writeTempFile, deleteTempFile, wipeTemp } from './fileio';
 
 export type UploadResult = { path: string; nonce: string };
-
-export async function readFileBytes(uri: string): Promise<Uint8Array> {
-  return new File(uri).bytes();
-}
 
 export async function encryptAndUpload(
   bucket: Bucket,
@@ -32,58 +30,13 @@ export async function encryptAndUpload(
   return { path, nonce };
 }
 
-const tmpDir = () => new Directory(Paths.cache, 'dildar-tmp');
-
-/** Downloads ciphertext (to cache), decrypts in memory, deletes the cipher file. */
+/** Downloads the ciphertext and decrypts it in memory. */
 export async function downloadAndDecrypt(bucket: Bucket, path: string, nonce: string, key: Uint8Array): Promise<Uint8Array> {
-  const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, 60);
-  if (error || !data) throw error ?? new Error('no_url');
-  const dir = tmpDir();
-  if (!dir.exists) dir.create({ intermediates: true, idempotent: true });
-  const target = new File(dir, `${uuid()}.bin`);
-  const file = await File.downloadFileAsync(data.signedUrl, target);
-  try {
-    const cipher = await file.bytes();
-    return openBytes(cipher, nonce, key);
-  } finally {
-    try {
-      file.delete();
-    } catch {
-      // already gone
-    }
-  }
+  return openBytes(await downloadCipher(bucket, path), nonce, key);
 }
 
 export function bytesToDataUri(bytes: Uint8Array, mime = 'image/jpeg'): string {
   return `data:${mime};base64,${toB64(bytes)}`;
-}
-
-/** Plaintext temp file for players that need a file URI. Call wipeTemp() after. */
-export async function writeTempFile(bytes: Uint8Array, ext: string): Promise<string> {
-  const dir = tmpDir();
-  if (!dir.exists) dir.create({ intermediates: true, idempotent: true });
-  const f = new File(dir, `${uuid()}.${ext}`);
-  f.create({ overwrite: true });
-  await f.write(bytes);
-  return f.uri;
-}
-
-export function deleteTempFile(uri: string): void {
-  try {
-    const f = new File(uri);
-    if (f.exists) f.delete();
-  } catch {
-    // ignore
-  }
-}
-
-export function wipeTemp(): void {
-  try {
-    const d = tmpDir();
-    if (d.exists) d.delete();
-  } catch {
-    // ignore
-  }
 }
 
 export async function removeObjects(bucket: Bucket, paths: string[]): Promise<void> {

@@ -1,12 +1,15 @@
 # Testing Dildar on two iPhones
 
-Automated checks (run before every build):
+Automated checks (run before every deploy):
 
 ```bash
-npm run typecheck   # 0 errors
-npm test            # 96 unit tests: crypto, DST/time zones, streaks, matching, chat, snaps, vault, games, spicy, closeness
-npm run test:db     # 14 tests: every migration on real Postgres (PGlite) — pairing, RLS, streaks, private matches
+npm run test:all    # typecheck app + server · 96 unit tests · 16 backend tests on the real Workers runtime
+npm run test:e2e    # two browsers on `wrangler dev`: sign-up, keys, pairing, profiles,
+                    # chat both ways + seen, game invite + synced cards, view-once snap
 ```
+
+Items marked *(iPhone app)* only apply to the native build. The website
+can't do them; see CLOUDFLARE.md › Good to know.
 
 Below, **A** = you, **B** = her. Tick each box on real phones (dev build or TestFlight).
 Everything should feel instant; anything laggy is a bug.
@@ -17,9 +20,9 @@ Everything should feel instant; anything laggy is a bug.
 - [ ] Try the same code on a third account → refused. A can't create a new code anymore.
 - [ ] Both profiles visible (Settings shows both avatars + names; avatar upload works).
 - [ ] Settings › Security › Safety code is identical on both phones.
-- [ ] Kill the app, reopen → Face ID. Background it for 60+ s → Face ID again. Under 60 s → no prompt.
-- [ ] App switcher shows a blurred card.
-- [ ] Shake the phone (or hold the heart logo) → calculator. Type `2580=` → Face ID → back.
+- [ ] *(iPhone app)* Kill the app, reopen → Face ID. Background it for 60+ s → Face ID again. Under 60 s → no prompt.
+- [ ] *(iPhone app)* App switcher shows a blurred card.
+- [ ] Hold the heart logo (iPhone app: or shake) → calculator. Type `2580=` → back (iPhone app: after Face ID).
 - [ ] Settings › Language › English → app reloads left-to-right; back to Kurdish → right-to-left.
 
 ## Phase 2: Chat
@@ -28,13 +31,13 @@ Everything should feel instant; anything laggy is a bug.
 - [ ] Swipe a bubble to reply; double-tap → ❤️; long-press → reaction picker / copy / delete (delete removes it on B too).
 - [ ] Photo, video and voice note (hold to record, slide to cancel) both ways.
 - [ ] Disappearing "after viewing": message is gone ~1 min after B sees it. "24h" mode shows the timer icon.
-- [ ] Close the app on B, send from A → B gets "دڵدار — شتێکی نوێ" (no content in the notification).
+- [ ] *(iPhone app)* Close the app on B, send from A → B gets "دڵدار — شتێکی نوێ" (no content in the notification).
 
 ## Phase 3: Snaps + streaks
-- [ ] Camera: flip, flash, tap to focus, pinch zoom, hold for video (stops at 30 s).
+- [ ] Camera: flip, take a photo. *(iPhone app)* flash, tap to focus, pinch zoom, hold for video (stops at 30 s).
 - [ ] Draw + Kurdish text + filter + 5 s timer → send. B sees the snap stack, opens it, it closes after 5 s, and can't be opened again.
 - [ ] Spicy blur: B must hold to reveal. Hold-to-keep pauses the timer.
-- [ ] Screenshot in the snap viewer → "📸" card in A's chat.
+- [ ] *(iPhone app)* Screenshot in the snap viewer → "📸" card in A's chat.
 - [ ] "Allow save" snap → B can save to vault; without it the button is hidden.
 - [ ] Both send a snap the same day (home time zone) → 🔥 1. Next day both again → 🔥 2.
 - [ ] Use a streak freeze after skipping exactly one day.

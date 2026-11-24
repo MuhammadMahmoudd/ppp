@@ -46,3 +46,4 @@ yarn-error.*
 # Worker build output
 server/.build/
 .wrangler/
+e2e/screenshots/

@@ -20,9 +20,10 @@ function renderPage(p: PageName, active: boolean) {
 export default function Home() {
   return (
     <View style={styles.root}>
-      <Pager render={renderPage} initial="camera" />
-      <TopBar />
-      <BottomNav />
+      <Pager render={renderPage} initial="camera">
+        <TopBar />
+        <BottomNav />
+      </Pager>
       <View style={styles.offline} pointerEvents="none"><OfflineBanner /></View>
       <MilestoneCelebration />
     </View>

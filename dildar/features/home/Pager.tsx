@@ -32,7 +32,8 @@ export function usePager(): PagerCtx {
   return c;
 }
 
-export function Pager({ render, initial = 'camera' }: { render: (p: PageName, active: boolean) => React.ReactNode; initial?: PageName }) {
+/** `children` render inside the pager context (top bar, bottom nav) but outside the swipe area. */
+export function Pager({ render, initial = 'camera', children }: { render: (p: PageName, active: boolean) => React.ReactNode; initial?: PageName; children?: React.ReactNode }) {
   const { width } = useWindowDimensions();
   const dir = I18nManager.isRTL ? -1 : 1;
   const [index, setIndex] = useState(PAGES.indexOf(initial));
@@ -98,6 +99,7 @@ export function Pager({ render, initial = 'camera' }: { render: (p: PageName, ac
           </Animated.View>
         </View>
       </GestureDetector>
+      {children}
     </Ctx.Provider>
   );
 }

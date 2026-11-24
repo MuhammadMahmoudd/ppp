@@ -1,14 +1,18 @@
 import * as LocalAuthentication from 'expo-local-authentication';
+import { Platform } from 'react-native';
 import { createStore, useStore } from '@/lib/store';
 import { currentStrings } from '@/lib/i18n';
 
 export type LockState = { locked: boolean; hidden: boolean; cover: boolean; authenticating: boolean };
-export const lockStore = createStore<LockState>({ locked: true, hidden: false, cover: false, authenticating: false });
+// Browsers have no Face ID: the web build starts unlocked.
+const IS_WEB = Platform.OS === 'web';
+export const lockStore = createStore<LockState>({ locked: !IS_WEB, hidden: false, cover: false, authenticating: false });
 
 export const useLock = () => useStore(lockStore);
 
 /** Face ID / passcode. Falls back to the device passcode when Face ID fails. */
 export async function authenticate(reason?: string): Promise<boolean> {
+  if (IS_WEB) return true;
   if (lockStore.get().authenticating) return false;
   lockStore.set((s) => ({ ...s, authenticating: true }));
   try {

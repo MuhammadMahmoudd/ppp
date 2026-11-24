@@ -34,6 +34,7 @@ export function TopBar() {
             <Avatar profile={partner} size={30} />
             <View style={[styles.dot, { backgroundColor: partnerOnline ? colors.success : colors.textFaint }]} />
           </View>
+          <IconButton name="heart-outline" label={s.nav.closeness} onPress={() => router.push('/closeness' as never)} />
         </View>
         <Pressy
           onLongPress={() => { haptic.heavy(); quickHide(); }}
@@ -47,7 +48,6 @@ export function TopBar() {
         </Pressy>
         <View style={[styles.side, styles.end]}>
           <StreakBadge onPress={() => router.push('/streak')} />
-          <IconButton name="heart-outline" label={s.nav.closeness} onPress={() => router.push('/closeness' as never)} />
           {spicyActive && <IconButton name="flame" color={colors.coral} label={s.nav.spicy} onPress={() => router.push('/spicy')} />}
           <IconButton name="lock-closed-outline" label={s.nav.vault} onPress={() => router.push('/vault')} />
         </View>
@@ -59,7 +59,7 @@ export function TopBar() {
 const styles = StyleSheet.create({
   wrap: { position: 'absolute', top: 0, start: 0, end: 0, zIndex: 50 },
   row: { flex: 1, flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.lg, justifyContent: 'space-between' },
-  side: { flexDirection: 'row', alignItems: 'center', gap: space.sm, flex: 1 },
+  side: { flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 },
   end: { justifyContent: 'flex-end' },
   logo: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   dot: { position: 'absolute', bottom: 0, end: 0, width: 10, height: 10, borderRadius: 5, borderWidth: 2, borderColor: colors.bg },

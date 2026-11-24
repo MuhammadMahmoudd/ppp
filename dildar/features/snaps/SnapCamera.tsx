@@ -6,7 +6,7 @@
  * session to be ready, then records. Releasing early cancels gracefully.
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState, Linking, StyleSheet, View } from 'react-native';
+import { AppState, Linking, StyleSheet, View, Platform } from 'react-native';
 import { CameraView, useCameraPermissions, useMicrophonePermissions, type CameraMode, type CameraType, type FlashMode, type FocusMode } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -23,6 +23,8 @@ import { useStrings } from '@/lib/i18n';
 import { haptic } from '@/lib/haptics';
 import { useReducedMotion } from '@/lib/settings';
 import type { Capture } from './sendSnap';
+
+const IS_WEB = Platform.OS === 'web';
 
 const MAX_VIDEO_S = 30;
 const SHUTTER = 84;
@@ -192,7 +194,9 @@ export function SnapCamera({ active, onCapture, topInset, bottomInset, accessory
   const previewGesture = Gesture.Simultaneous(pinch, Gesture.Exclusive(doubleTap, tap));
 
   // shutter: tap = photo, long press = video
+  // Browsers can't record from expo-camera: no hold-for-video on web.
   const longPress = Gesture.LongPress()
+      .enabled(!IS_WEB)
       .minDuration(280)
       .maxDistance(400)
       .onStart(() => {
@@ -315,7 +319,7 @@ export function SnapCamera({ active, onCapture, topInset, bottomInset, accessory
           </GestureDetector>
           <View style={{ width: 42 }} />
         </View>
-        <Txt variant="tiny" muted center>{s.snaps.holdForVideo}</Txt>
+        {!IS_WEB && <Txt variant="tiny" muted center>{s.snaps.holdForVideo}</Txt>}
       </View>
     </View>
   );

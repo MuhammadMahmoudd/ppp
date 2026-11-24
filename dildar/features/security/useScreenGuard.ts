@@ -5,6 +5,7 @@
  *    chat, and pushes the partner.
  */
 import { useEffect } from 'react';
+import { Platform } from 'react-native';
 import * as ScreenCapture from 'expo-screen-capture';
 import { api } from '@/lib/api';
 import { useSession } from '@/lib/session';
@@ -27,8 +28,10 @@ export async function reportScreenshot(coupleId: string, key: Uint8Array | null,
   notifyPartner('screenshot');
 }
 
-export function useScreenGuard(context: ScreenshotContext, targetId?: string, active = true) {
+export function useScreenGuard(context: ScreenshotContext, targetId?: string, activeProp = true) {
   const { couple, sharedKey } = useSession();
+  // Browsers can't block recording or detect screenshots.
+  const active = activeProp && Platform.OS !== 'web';
   useEffect(() => {
     if (!active) return;
     const key = `guard-${context}`;

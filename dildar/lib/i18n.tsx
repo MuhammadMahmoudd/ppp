@@ -2,7 +2,7 @@
  * i18n: Sorani (RTL) first, English optional. Components read strings with
  * `const s = useStrings()` → `s.chat.title`, and format with `fmt()`.
  */
-import { I18nManager } from 'react-native';
+import { I18nManager, Platform } from 'react-native';
 import { ckb, type Strings } from '@/i18n/ckb';
 import { en } from '@/i18n/en';
 import { settingsStore, useSettings, updateSettings, type Locale } from './settings';
@@ -49,6 +49,17 @@ export const isRTL = (): boolean => I18nManager.isRTL;
  */
 export function applyDirection(locale: Locale): boolean {
   const wantRTL = locale === 'ckb';
+  if (Platform.OS === 'web') {
+    // react-native-web's I18nManager is a stub: drive direction through the
+    // document's dir attribute (CSS flexbox/start/end follow it) and mirror
+    // the flag so code reading I18nManager.isRTL keeps working.
+    if (typeof document !== 'undefined') {
+      document.documentElement.dir = wantRTL ? 'rtl' : 'ltr';
+      document.documentElement.lang = locale;
+    }
+    (I18nManager as unknown as { isRTL: boolean }).isRTL = wantRTL;
+    return false;
+  }
   I18nManager.allowRTL(wantRTL);
   if (I18nManager.isRTL !== wantRTL) {
     I18nManager.forceRTL(wantRTL);
@@ -59,6 +70,11 @@ export function applyDirection(locale: Locale): boolean {
 
 export async function setLocale(locale: Locale): Promise<void> {
   updateSettings({ locale });
+  if (Platform.OS === 'web') {
+    // give AsyncStorage (localStorage) a tick to persist, then reload in the new direction
+    setTimeout(() => window.location.reload(), 50);
+    return;
+  }
   if (applyDirection(locale)) {
     const Updates = await import('expo-updates');
     try {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { I18nManager, StyleSheet, Switch, View } from 'react-native';
+import { I18nManager, Platform, StyleSheet, Switch, View, type SwitchProps } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressy } from './Pressy';
 import { Txt } from './Txt';
@@ -27,13 +27,16 @@ export function ListRow({ icon, title, subtitle, value, onPress, toggle, danger 
       </View>
       {value ? <Txt variant="small" muted>{value}</Txt> : null}
       {toggle ? (
-        <Switch
-          value={toggle.value}
-          disabled={toggle.disabled}
-          onValueChange={(v) => { haptic.select(); toggle.onChange(v); }}
-          trackColor={{ true: colors.accent, false: colors.surfaceStrong }}
-          thumbColor={colors.text}
-        />
+        <View style={styles.switchBox}>
+          <Switch
+            value={toggle.value}
+            disabled={toggle.disabled}
+            onValueChange={(v) => { haptic.select(); toggle.onChange(v); }}
+            trackColor={{ true: colors.accent, false: colors.surfaceStrong }}
+            thumbColor={colors.text}
+            {...WEB_SWITCH}
+          />
+        </View>
       ) : onPress ? (
         <Ionicons name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'} size={18} color={colors.textFaint} />
       ) : null}
@@ -47,7 +50,12 @@ export function Divider() {
   return <View style={styles.divider} />;
 }
 
+// react-native-web's Switch ignores thumbColor (it reads activeThumbColor) and
+// mis-places its thumb inside an RTL document, so pin it to LTR on web.
+const WEB_SWITCH = (Platform.OS === 'web' ? { activeThumbColor: colors.text, activeTrackColor: colors.accent } : {}) as Partial<SwitchProps>;
+
 const styles = StyleSheet.create({
+  switchBox: Platform.OS === 'web' ? { direction: 'ltr' } : {},
   row: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.md, minHeight: 52 },
   flex: { flex: 1 },
   divider: { height: StyleSheet.hairlineWidth, backgroundColor: colors.border },

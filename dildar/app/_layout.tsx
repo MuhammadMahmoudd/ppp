@@ -7,7 +7,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { useFonts, Vazirmatn_400Regular, Vazirmatn_600SemiBold, Vazirmatn_800ExtraBold } from '@expo-google-fonts/vazirmatn';
-import { DevSettings, StyleSheet } from 'react-native';
+import { DevSettings, Platform, StyleSheet } from 'react-native';
 import { loadSettings } from '@/lib/settings';
 import { applyDirection } from '@/lib/i18n';
 import { startQueue } from '@/lib/offlineQueue';
@@ -93,7 +93,7 @@ export default function RootLayout() {
         // RTL/LTR switch only takes effect after a reload.
         import('expo-updates')
           .then((U) => U.reloadAsync())
-          .catch(() => DevSettings.reload());
+          .catch(() => (Platform.OS === 'web' ? window.location.reload() : DevSettings.reload()));
         return;
       }
       wipeTemp();

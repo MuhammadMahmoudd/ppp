@@ -18,7 +18,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     bundleIdentifier: 'com.surchy.dildar',
     supportsTablet: false,
-    usesAppleSignIn: true,
     config: { usesNonExemptEncryption: false },
     infoPlist: {
       // English defaults; Kurdish versions live in ./locales/ckb.json
@@ -36,6 +35,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ckb: './locales/ckb.json',
     en: './locales/en.json',
   },
+  web: {
+    bundler: 'metro',
+    output: 'single',
+    favicon: './assets/favicon.png',
+    name: 'دڵدار',
+    shortName: 'دڵدار',
+    themeColor: '#0B0709',
+    backgroundColor: '#0B0709',
+    lang: 'ckb',
+    dir: 'rtl',
+  },
   android: {
     package: 'com.surchy.dildar',
     adaptiveIcon: {
@@ -47,7 +57,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-router',
     'expo-dev-client',
     'expo-secure-store',
-    'expo-apple-authentication',
     'expo-localization',
     'expo-font',
     [

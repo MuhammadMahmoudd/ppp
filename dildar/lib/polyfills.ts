@@ -1,6 +1,10 @@
 /** Imported first in app/_layout.tsx. */
 import * as ExpoCrypto from 'expo-crypto';
+import { Platform } from 'react-native';
 import { installPRNG } from './crypto';
+import { installWebPolyfills } from './webPolyfills';
+
+if (Platform.OS === 'web') installWebPolyfills();
 
 // expo-crypto caps a single call at 1024 bytes, so chunk larger requests.
 installPRNG((n) => {

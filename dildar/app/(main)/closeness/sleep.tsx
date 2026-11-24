@@ -22,7 +22,7 @@ import { BeatingHeart } from '@/features/closeness/ui';
 
 export default function SleepMode() {
   // keep the screen (and the shared heartbeat haptics) alive while sleeping together
-  useKeepAwake('dildar-sleep');
+  useKeepAwake('dildar-sleep', { suppressDeactivateWarnings: true });
   const s = useStrings();
   const sl = s.closeness.sleep;
   const settings = useSettings();

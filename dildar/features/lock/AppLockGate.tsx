@@ -5,7 +5,7 @@
  *  • quick-hide: shake or long-press logo → fake calculator
  */
 import React, { useEffect, useRef } from 'react';
-import { AppState, StyleSheet, View } from 'react-native';
+import { AppState, Platform, StyleSheet, View } from 'react-native';
 import { BlurView } from 'expo-blur';
 import * as ScreenCapture from 'expo-screen-capture';
 import { Accelerometer } from 'expo-sensors';
@@ -25,7 +25,7 @@ export function AppLockGate({ children, enabled, skipInitialLock }: { children: 
 
   useEffect(() => {
     if (!faceIdOnOpen) lockStore.set((s) => ({ ...s, locked: false }));
-    ScreenCapture.enableAppSwitcherProtectionAsync(0.9).catch(() => undefined);
+    if (Platform.OS !== 'web') ScreenCapture.enableAppSwitcherProtectionAsync(0.9).catch(() => undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -47,7 +47,7 @@ export function AppLockGate({ children, enabled, skipInitialLock }: { children: 
       if (st === 'active') {
         const away = backgroundAt.current ? Date.now() - backgroundAt.current : 0;
         backgroundAt.current = null;
-        const shouldLock = s.faceIdOnOpen && s.autoLock && away > AUTO_LOCK_MS;
+        const shouldLock = Platform.OS !== 'web' && s.faceIdOnOpen && s.autoLock && away > AUTO_LOCK_MS;
         lockStore.set((l) => ({ ...l, cover: false, locked: l.locked || shouldLock }));
       }
     });
@@ -56,7 +56,7 @@ export function AppLockGate({ children, enabled, skipInitialLock }: { children: 
 
   // Shake detection (a quick spike above ~2.3g).
   useEffect(() => {
-    if (!quickHideShake || !enabled) return;
+    if (!quickHideShake || !enabled || Platform.OS === 'web') return;
     let last = 0;
     Accelerometer.setUpdateInterval(120);
     const sub = Accelerometer.addListener(({ x, y, z }) => {

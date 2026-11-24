@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
-import * as AppleAuthentication from 'expo-apple-authentication';
-import * as ExpoCrypto from 'expo-crypto';
+import { StyleSheet, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -14,7 +12,6 @@ import { colors, gradients, space } from '@/lib/theme';
 import { useStrings } from '@/lib/i18n';
 import { api, errorCode } from '@/lib/api';
 import { haptic } from '@/lib/haptics';
-import { toHex, randomBytes } from '@/lib/crypto';
 
 export default function Welcome() {
   const s = useStrings();
@@ -48,24 +45,6 @@ export default function Welcome() {
     }
   };
 
-  const apple = async () => {
-    try {
-      const raw = toHex(randomBytes(16));
-      const hashed = await ExpoCrypto.digestStringAsync(ExpoCrypto.CryptoDigestAlgorithm.SHA256, raw);
-      const cred = await AppleAuthentication.signInAsync({
-        requestedScopes: [AppleAuthentication.AppleAuthenticationScope.EMAIL],
-        nonce: hashed,
-      });
-      if (!cred.identityToken) throw new Error('no_token');
-      const { error: e } = await api.auth.signInWithIdToken({ provider: 'apple', token: cred.identityToken, nonce: raw });
-      if (e) throw e;
-      haptic.success();
-    } catch (e) {
-      if ((e as { code?: string }).code === 'ERR_REQUEST_CANCELED') return;
-      setError(s.auth.errors.generic);
-    }
-  };
-
   return (
     <View style={styles.root}>
       <LinearGradient colors={['#2A0E18', colors.bg]} style={StyleSheet.absoluteFill} />
@@ -86,15 +65,6 @@ export default function Welcome() {
             {info ? <Txt color={colors.success} center>{info}</Txt> : null}
             <Button title={mode === 'signIn' ? s.auth.signIn : s.auth.signUp} onPress={submit} loading={busy} />
             <Button variant="ghost" title={mode === 'signIn' ? s.auth.noAccount : s.auth.haveAccount} onPress={() => setMode(mode === 'signIn' ? 'signUp' : 'signIn')} small />
-            {Platform.OS === 'ios' && (
-              <AppleAuthentication.AppleAuthenticationButton
-                buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE}
-                cornerRadius={20}
-                style={styles.apple}
-                onPress={apple}
-              />
-            )}
           </Animated.View>
         </KeyboardAwareScrollView>
       </SafeAreaView>
@@ -109,5 +79,4 @@ const styles = StyleSheet.create({
   hero: { alignItems: 'center', gap: space.md },
   logo: { width: 104, height: 104, borderRadius: 36, alignItems: 'center', justifyContent: 'center', marginBottom: space.md },
   form: { gap: space.md },
-  apple: { height: 54, marginTop: space.sm },
 });

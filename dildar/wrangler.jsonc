@@ -1,0 +1,29 @@
+// Dildar on Cloudflare — one Worker serves the web app + API.
+// Setup steps are in CLOUDFLARE.md.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "dildar",
+  "main": "server/src/index.ts",
+  "compatibility_date": "2025-09-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "dildar",
+      // paste the id printed by: npx wrangler d1 create dildar
+      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "migrations_dir": "server/migrations"
+    }
+  ],
+  "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "dildar-media" }],
+  "durable_objects": { "bindings": [{ "name": "ROOMS", "class_name": "CoupleRoom" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["CoupleRoom"] }],
+  "triggers": { "crons": ["* * * * *"] },
+  "vars": { "MAX_USERS": "2" },
+  "observability": { "enabled": true }
+}

@@ -42,3 +42,7 @@ yarn-error.*
 
 # env with real values
 .env
+
+# Worker build output
+server/.build/
+.wrangler/

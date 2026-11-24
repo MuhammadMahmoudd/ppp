@@ -22,7 +22,8 @@ export async function encryptAndUpload(
   const plain = typeof source === 'string' ? await readFileBytes(source) : source;
   const { cipher, nonce } = sealBytes(plain, key);
   const path = `${coupleId}/${uuid()}`;
-  const { error } = await api.storage.from(bucket).upload(path, cipher.buffer as ArrayBuffer, {
+  // pass the view itself: nacl returns a subarray, so `.buffer` would include 16 extra bytes
+  const { error } = await api.storage.from(bucket).upload(path, cipher, {
     contentType: 'application/octet-stream',
     upsert: false,
   });

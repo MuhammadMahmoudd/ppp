@@ -161,7 +161,7 @@ export function ChatHome({ active }: { active: boolean }) {
         // inverted list: newest sits at offset 0, older pages append at the far end
         maintainVisibleContentPosition={{ disabled: true }}
         ListHeaderComponent={
-          <View style={{ paddingBottom: composerH + space.sm }}>
+          <View style={{ paddingBottom: composerH + bottom + space.sm }}>
             <UploadsRow />
           </View>
         }

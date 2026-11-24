@@ -3,8 +3,7 @@
  * Realtime. Everything the app needs to know "who are we" comes from here.
  */
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import type { Session } from '@supabase/supabase-js';
-import { api, apiConfigured } from './api';
+import { api, apiConfigured, type Session } from './api';
 import type { CoupleRow, MemberRow, ProfileRow } from './database.types';
 import { deriveSharedKey, type KeyPairB64 } from './crypto';
 import { loadLocalKeyPair, publishPublicKey } from './keys';

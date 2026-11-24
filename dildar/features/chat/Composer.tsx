@@ -4,7 +4,7 @@
  * preview and "voice proof for a dare" mode.
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, I18nManager, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, I18nManager, Platform, StyleSheet, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import {
   RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioRecorder, useAudioRecorderState,
@@ -234,6 +234,18 @@ export function Composer({ ctx, disappearDefault, reply, onCancelReply, proofFor
                 multiline
                 style={styles.input}
                 maxLength={4000}
+                onKeyPress={
+                  Platform.OS === 'web'
+                    ? (e) => {
+                        // web: Enter sends, Shift+Enter adds a new line
+                        const ne = e.nativeEvent as unknown as { key: string; shiftKey?: boolean; isComposing?: boolean };
+                        if (ne.key === 'Enter' && !ne.shiftKey && !ne.isComposing) {
+                          (e as unknown as { preventDefault(): void }).preventDefault();
+                          send();
+                        }
+                      }
+                    : undefined
+                }
               />
               <Pressy
                 onPress={() => setMode(NEXT_MODE[mode])}

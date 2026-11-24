@@ -9,22 +9,11 @@ export async function readFileBytes(uri: string): Promise<Uint8Array> {
   return new File(uri).bytes();
 }
 
-/** Downloads the ciphertext via a short-lived signed URL; the cipher file is deleted right after reading. */
+/** Downloads the ciphertext (decrypted by the caller, in memory). */
 export async function downloadCipher(bucket: Bucket, path: string): Promise<Uint8Array> {
-  const { data, error } = await api.storage.from(bucket).createSignedUrl(path, 60);
-  if (error || !data) throw error ?? new Error('no_url');
-  const dir = tmpDir();
-  if (!dir.exists) dir.create({ intermediates: true, idempotent: true });
-  const file = await File.downloadFileAsync(data.signedUrl, new File(dir, `${uuid()}.bin`));
-  try {
-    return await file.bytes();
-  } finally {
-    try {
-      file.delete();
-    } catch {
-      // already gone
-    }
-  }
+  const { data, error } = await api.storage.from(bucket).download(path);
+  if (error || !data) throw error ?? new Error('download_failed');
+  return new Uint8Array(await data.arrayBuffer());
 }
 
 export async function writeTempFile(bytes: Uint8Array, ext: string): Promise<string> {

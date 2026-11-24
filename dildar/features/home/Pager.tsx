@@ -5,7 +5,7 @@
  * usePager().gesture, and editors can disable swiping entirely.
  */
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { I18nManager, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { I18nManager, Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
 type PanGesture = ReturnType<typeof Gesture.Pan>;
@@ -105,6 +105,7 @@ export function Pager({ render, initial = 'camera', children }: { render: (p: Pa
 }
 
 const styles = StyleSheet.create({
-  clip: { flex: 1, overflow: 'hidden', direction: 'ltr' },
+  clip: { flex: 1, // web: 'clip' (not 'hidden') so the browser can't scroll off-screen pages into view
+    overflow: Platform.OS === 'web' ? ('clip' as 'hidden') : 'hidden', direction: 'ltr' },
   page: { position: 'absolute', top: 0, bottom: 0 },
 });
